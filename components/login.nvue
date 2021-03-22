@@ -1,0 +1,113 @@
+<template>
+	<u-row gutter="16" justify="center" style="margin-top: 150px;">
+		<u-col span="6">
+			<view class="demo-layout bg-purple-light">
+				
+				<u-form :model="loginData" ref="uForm">
+					<u-form-item label="账号"><u-input v-model="loginData.userID" placeholder="" /></u-form-item>
+					<u-form-item label="密码">
+						<u-input 
+							v-model="loginData.userPW" 
+							placeholder="" 
+							type='password'
+						/>
+					</u-form-item>
+				</u-form>
+				<u-row gutter="16" justify="center">
+					<u-col span="8">
+						<u-button 
+							type="primary" 
+							shape="circle" 
+							:plain="true" 
+							:ripple="true" 
+							ripple-bg-color="#909399"
+							style="width: 80%;margin-top: 15rpx;"
+							@click="login()"
+						>登录</u-button>						
+					</u-col>
+					<u-col span="8">
+						<u-button
+							shape="circle"
+							:plain="true" 
+							:ripple="true"
+							style="width: 80%;margin-top: 15rpx;"
+						>注册</u-button>
+					</u-col>
+				</u-row>
+
+			</view>
+		</u-col>
+	</u-row>
+</template>
+
+<script>
+	import { genTestUserSig } from "../utils/getPasswd.js"
+	export default {
+		data() {
+			return {
+				title: 'Hello',
+				loginData: {
+					userID:'ZeroS',
+					userPW:123456
+				}
+			}
+		},
+		onLoad() {
+		
+		},
+		methods: {
+			login: function () {
+				// this.Request.UserLogin(this.loginData)
+				// this.setStorage(true)
+				this.Request.UserLogin(this.loginData)
+				.then((res)=>{
+					console.log(res)
+					if (res.data.code === 200)
+					this.timLogin(res.data.data.timId,res.data.data.userSig)
+					else
+					console.log("error")
+				})
+
+			},
+			// timSDK 登录
+			timLogin: function (userID, userSig) {
+				let promise = this.Tim.login({userID, userSig});
+				promise.then((imResponse)=>{
+					this.$store.commit('changeLoginState',true)					
+					console.log(imResponse.data); // 登录成功
+					if (imResponse.data.repeatLogin === true) {
+						// 标识账号已登录，本次登录操作为重复登录。v2.5.1 起支持
+						console.log(imResponse.data.errorInfo);
+					}
+					
+				}).catch(function(imError) {
+					console.warn('login error:', imError); // 登录失败的相关信息
+					this.$store.commit('changeLoginState',false)
+				});
+			},
+			setStorage: function (isLoginData) {
+				uni.setStorage({
+					key: "isLogin",
+					data: isLoginData,
+					success: (res) => {
+						// uni.showModal({
+						// 	title: '存储数据成功',
+						// 	content: JSON.stringify(res.errMsg),
+						// 	showCancel:false
+						// })
+					},
+					fail: () => {
+						uni.showModal({
+							title: '储存数据失败!',
+							showCancel:false
+						})
+					}
+				})
+			},
+		}
+	}
+</script>
+
+<style>
+
+</style>

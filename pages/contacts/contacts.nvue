@@ -1,0 +1,62 @@
+<template>
+	<view class="uni-container">
+		<uni-list :border="false" v-for="n in 15">
+			<uni-list-item 
+				link="true"
+				showArrow="false"
+			>
+				<view slot="header" class="slot-box">
+					<image class="slot-image" src="/static/logo.png" mode="widthFix"></image>
+				</view>
+				<text slot="body" class="slot-box slot-text">第{{n}}个好友</text>
+			</uni-list-item>
+		</uni-list>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				
+			}
+		},
+		onShow() {
+			this.Request.Test()
+			.then((res)=>{
+				console.log(res)
+			})
+		},
+
+		methods: {
+			
+		}
+	}
+</script>
+
+<style>
+	.slot-box {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.slot-image {
+		/* #ifndef APP-NVUE */
+		display: block;
+		/* #endif */
+		margin-right: 15px;
+		width: 40px;
+		height: 40px;
+	}
+
+	.slot-text {
+		flex: 1;
+		font-size: 15px;
+		font-weight: bold;
+		/* color: #4cd964; */
+		margin-right: 10px;
+	}
+</style>

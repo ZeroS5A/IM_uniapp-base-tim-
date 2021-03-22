@@ -1,0 +1,93 @@
+{
+	"easycom": {
+		"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue"
+	},
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/setting/index",
+			"style": {
+				"navigationBarTitleText": ""
+			}
+		},
+		{
+			"path" : "pages/square/square",
+			"style" :                                                                                    
+			{
+				"navigationBarTitleText": "广场",
+				"enablePullDownRefresh": false
+			}
+		    
+		},
+		{
+			"path" : "pages/contacts/contacts",
+			"style" :                                                                                    
+			{
+				"navigationBarTitleText": "联系人",
+				"app-plus": {
+					"titleNView": {
+						"buttons": [{
+							"text": "\ue534",
+							"fontSrc": "/static/uni.ttf",
+							"fontSize": "22px",
+							"color": "#FFFFFF"
+						}]
+					}
+				}
+			}			
+		},
+		{
+			"path" : "pages/dialog/dialog",
+			"style" :                                                                                    
+			{
+				"navigationBarTitleText": "会话",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path" : "components/HM-chat/HM-chat",
+			"style" :                                                                                  
+			{
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false
+			}
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#007AFF",
+		"borderStyle": "black",
+		"backgroundColor": "#F8F8F8",
+		"list": [
+			{
+				"pagePath": "pages/dialog/dialog",
+				"iconPath": "static/tabbar/comment.png",
+				"selectedIconPath": "static/tabbar/comment-b.png",
+				"text": "会话"
+			},
+			{
+				"pagePath": "pages/contacts/contacts",
+				"iconPath": "static/tabbar/user.png",
+				"selectedIconPath": "static/tabbar/user-b.png",
+				"text": "联系人"
+			},
+			{
+				"pagePath": "pages/square/square",
+				"iconPath": "static/tabbar/loading.png",
+				"selectedIconPath": "static/tabbar/loading-b.png",
+				"text": "广场"
+			},
+			{
+				"pagePath": "pages/setting/index",
+				"iconPath": "static/tabbar/setting.png",
+				"selectedIconPath": "static/tabbar/setting-b.png",
+				"text": "设置"
+			}
+		]
+	}
+}
