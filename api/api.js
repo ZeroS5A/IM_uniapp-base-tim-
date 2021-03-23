@@ -48,6 +48,12 @@ export default {
   UserLogin(data){
     return instance.post("/user/userLogin",data)
   },
+	GetUserRelation(userID){
+		return instance.post(`/user/getUserRelation?userID=${userID}`)
+	},
+	AddUserRelation(postData){
+		return instance.post("/user/addUserRelation",postData)
+	},
 	Test(){
 	  return instance.post("/hello")
 	}

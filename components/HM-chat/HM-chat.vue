@@ -247,7 +247,8 @@
 					conversationID:'',
 					nextReqMessageID :'',
 					isCompleted: false
-				}
+				},
+				userinfo:this.$store.state.userProfile,
 			};
 		},
 		// 收到新信息触发
@@ -576,24 +577,71 @@
 				});
 				this.hideDrawer();
 			},
-			//选照片 or 拍照
+			// 选照片 or 拍照
 			getImage(type){
 				this.hideDrawer();
 				uni.chooseImage({
 					sourceType:[type],
 					sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
 					success: (res)=>{
+						// 本地处理
 						for(let i=0;i<res.tempFilePaths.length;i++){
 							uni.getImageInfo({
 								src: res.tempFilePaths[i],
-								success: (image)=>{
-									console.log(image.width);
-									console.log(image.height);
+								success: async (image)=>{
+									// 本地
+									// console.log(image.width);
+									// console.log(image.height);
+									console.log(res.tempFilePaths)
 									let msg = {url:res.tempFilePaths[i],w:image.width,h:image.height};
 									this.sendMsg(msg,'img');
+									
+									// // 1. 创建消息实例，接口返回的实例可以上屏
+									// let message = this.Tim.createImageMessage({
+									//   to: this.dialogData.to,
+									//   conversationType: TIM.TYPES.CONV_C2C,
+									//   payload: {
+									//     file: res,
+									//   },
+									//   onProgress: function(event) { console.log('file uploading:', event) }
+									// });
+																
+									// // 2. 发送消息
+									// let promise = this.Tim.sendMessage(message);
+									// promise.then(function(imResponse) {
+									//   // 发送成功
+									//   console.log(imResponse);
+									// }).catch(function(imError) {
+									//   // 发送失败
+									//   console.warn('sendMessage error:', imError);
+									// });
+									
 								}
 							});
 						}
+						// 上传发送处理
+						res.tempFiles.forEach(img=>{
+								console.log(res)
+								// 1. 创建消息实例，接口返回的实例可以上屏
+							  let message = this.Tim.createImageMessage({
+							    to: this.dialogData.to,
+							    conversationType: TIM.TYPES.CONV_C2C,
+							    payload: {
+							      file: img
+							    },
+							    onProgress: function(event) { console.log('file uploading:', event) }
+							  });
+							
+							  // 2. 发送消息
+							  let promise = this.Tim.sendMessage(message);
+							  promise.then(function(imResponse) {
+							    // 发送成功
+							    console.log(imResponse);
+							  }).catch(function(imError) {
+							    // 发送失败
+							    console.warn('sendMessage error:', imError);
+							  });
+						})
 					}
 				});
 			},
@@ -624,6 +672,8 @@
 				if(!this.textMsg){
 					return;
 				}
+				
+				console.log(this.dialogData.to)
 				
 				// 1. 创建消息实例，接口返回的实例可以上屏
 				let message = this.Tim.createTextMessage({
@@ -674,9 +724,9 @@
 			sendMsg(content,type){
 				//实际应用中，此处应该提交长连接，模板仅做本地处理。
 				var nowDate = new Date();
-				let lastid = this.msgList[this.msgList.length-1].msg.id;
+				let lastid = this.msgList[this.msgList.length-1].msg.id || 0;
 				lastid++;
-				let msg = {type:'user',msg:{id:lastid,time:nowDate.getHours()+":"+nowDate.getMinutes(),type:type,userinfo:{uid:0,username:"大黑哥",face:"/static/img/face.jpg"},content:content}}
+				let msg = {type:'user',msg:{id:lastid,time:nowDate.getHours()+":"+nowDate.getMinutes(),type:type,userinfo:{uid:0,username:this.userinfo.nick,face:this.userinfo.avatar},content:content}}
 				// 发送消息
 				this.screenMsg(msg);
 				// // 定时器模拟对方回复,三秒
@@ -699,6 +749,7 @@
 			},
 			// 添加图片消息到列表
 			addImgMsg(msg){
+				console.log(msg)
 				msg.msg.content = this.setPicSize(msg.msg.content);
 				this.msgImgList.push(msg.msg.content.url);
 				this.msgList.push(msg);

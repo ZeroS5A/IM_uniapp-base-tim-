@@ -5,12 +5,11 @@
 				<uni-list-chat
 					:title="getDialogName(dialog)"
 					link="true"
-					avatar="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png"
+					:avatar="getDialogAvatar(dialog)?getDialogAvatar(dialog):'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png'"
 					:note="`${dialog.lastMessage.messageForShow}`" time="20:20"
 					badge-positon="left"
 					:badge-text="dialog.unreadCount"
-					:to="`../../components/HM-chat/HM-chat?conversationID=${dialog.conversationID}&type=${dialog.type}&to=${getDialogName(dialog)}
-					`"
+					:to="`../../components/HM-chat/HM-chat?conversationID=${dialog.conversationID}&type=${dialog.type}&to=${getDialogTo(dialog)}`"
 				/>
 			</uni-list>
 		</uni-list>
@@ -39,13 +38,49 @@
 			  console.warn('getConversationList error:', imError); // 获取会话列表失败的相关信息
 			});
 		},
+		computed: {
+			isLogin(){
+				return this.$store.state.isLogin;
+			},
+			getUserProfile(){
+				return this.$store.state.userProfile
+			}
+		},
 		methods: {
-			getDialogName: function (dialog) {
+			getDialogTo: function (dialog) {
 				if (dialog.type ==='C2C'){
 					return dialog.userProfile.userID
 				}
 				else if (dialog.type === 'GROUP') {
 					return dialog.groupProfile.groupID
+				}
+				else if (dialog.type === "@TIM#SYSTEM") {
+					return "系统通知"
+				}
+				else {
+					return "未知"
+				}
+			},
+			getDialogName: function (dialog) {
+				if (dialog.type ==='C2C'){
+					return dialog.userProfile.nick?dialog.userProfile.nick:dialog.userProfile.userID
+				}
+				else if (dialog.type === 'GROUP') {
+					return dialog.groupProfile.name?dialog.groupProfile.name:dialog.groupProfile.groupID
+				}
+				else if (dialog.type === "@TIM#SYSTEM") {
+					return "系统通知"
+				}
+				else {
+					return "未知"
+				}
+			},
+			getDialogAvatar: function (dialog) {
+				if (dialog.type ==='C2C'){
+					return dialog.userProfile.avatar
+				}
+				else if (dialog.type === 'GROUP') {
+					return dialog.groupProfile.avatar
 				}
 				else if (dialog.type === "@TIM#SYSTEM") {
 					return "系统通知"

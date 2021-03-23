@@ -11,6 +11,20 @@ const store = new Vuex.Store({
 			name:'helloVueX',
 			isLogin: false,
 			newMessage: [],
+			userProfile: {
+				userID:'',
+				adminForbidType: "",
+				allowType: "",
+				avatar: "",
+				birthday: 0,
+				gender: "",
+				language: 0,
+				lastUpdatedTime: 0,
+				level: 0,
+				location: "",
+				messageSettings: 0,
+				nick: "",
+			},
     },
 		mutations:{
 			//es6语法，等同edit:funcion(){...}
@@ -22,6 +36,9 @@ const store = new Vuex.Store({
 			},
 			setNewMessage(state, newMessage){
 				state.newMessage = newMessage
+			},
+			setUserProfile(state, profile){
+				state.userProfile = profile
 			}
 		}
 })

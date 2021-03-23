@@ -4,19 +4,34 @@
 		<view class="text-area">
 			<text class="title">{{title}}</text>
 		</view> -->
-		<uni-list-item
-			v-if="isLogin"
-			title="ZeroS" 
-			note="列表描述信息" 
-			showArrow thumb="https://lczeros.cn/blogData/images/b2ac992080e7ad69a4797ef82ccfc87a.jpeg" 
-			thumb-size="lg" 
-			rightText="大图"
-			style=";"
-			link
-			@click="logout()"
-		/>
+
 		<Login v-if="!isLogin"></Login>
-		
+		<view v-if="isLogin">
+			<!-- <uni-list-item
+				v-if="isLogin"
+				title="ZeroS" 
+				note="列表描述信息" 
+				showArrow 
+				:thumb="this.$store.state.userProfile.avatar"
+				thumb-size="lg" 
+				rightText=""
+				style=";"
+				link
+				
+			/> -->
+			<uni-list-item
+				link="true"
+				showArrow="false"
+			>
+				<view slot="header" class="slot-box">
+					<image class="slot-image" :src="getUserProfile.avatar?getUserProfile.avatar:'/static/logo.png'" mode="widthFix"></image>
+				</view>
+				<text slot="body" class="slot-box slot-text">{{getUserProfile.nick?getUserProfile.nick:getUserProfile.userID}}</text>
+			</uni-list-item>
+			
+			<uni-list-item link title="个人信息" @click="showUserProfile()" style="margin-top: 50rpx;" ></uni-list-item>
+			<uni-list-item link title="退出登录" @click="logout()" ></uni-list-item>
+		</view>
 
 	</view>
 </template>
@@ -30,7 +45,7 @@
 		},
 		data() {
 			return {
-				
+				userProfile:{}
 			}
 		},
 		onLoad() {
@@ -42,9 +57,15 @@
 			})
 
 		},
+		// onShow() {
+		// 	this.userProfile = this.$store.state.userProfile
+		// },
 		computed: {
 			isLogin(){
 				return this.$store.state.isLogin;
+			},
+			getUserProfile(){
+				return this.$store.state.userProfile
 			}
 		},
 		methods: {
@@ -57,6 +78,9 @@
 					this.$store.commit('changeLoginState',false)
 				  console.warn('logout error:', imError);
 				});
+			},
+			showUserProfile: function () {
+				console.log(this.$store.state.userProfile)
 			},
 			getStorage: function (key) {
 				if (key.length === 0) {
@@ -144,4 +168,30 @@
 		font-size: 36rpx;
 		color: #8f8f94;
 	}
+
+	.slot-box {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.slot-image {
+		/* #ifndef APP-NVUE */
+		display: block;
+		/* #endif */
+		margin-right: 15px;
+		width: 40px;
+		height: 40px;
+	}
+
+	.slot-text {
+		flex: 1;
+		font-size: 15px;
+		font-weight: bold;
+		/* color: #4cd964; */
+		margin-right: 10px;
+	}
+
 </style>

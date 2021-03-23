@@ -73,18 +73,22 @@
 			timLogin: function (userID, userSig) {
 				let promise = this.Tim.login({userID, userSig});
 				promise.then((imResponse)=>{
+					
 					this.$store.commit('changeLoginState',true)					
-					console.log(imResponse.data); // 登录成功
+					console.log("登录成功"); // 登录成功
+					
 					if (imResponse.data.repeatLogin === true) {
 						// 标识账号已登录，本次登录操作为重复登录。v2.5.1 起支持
 						console.log(imResponse.data.errorInfo);
 					}
-					
-				}).catch(function(imError) {
+				})
+				.catch(function(imError) {
 					console.warn('login error:', imError); // 登录失败的相关信息
 					this.$store.commit('changeLoginState',false)
-				});
+				})
+
 			},
+					
 			setStorage: function (isLoginData) {
 				uni.setStorage({
 					key: "isLogin",
