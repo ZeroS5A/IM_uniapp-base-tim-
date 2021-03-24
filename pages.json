@@ -2,11 +2,12 @@
 	"easycom": {
 		"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue"
 	},
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+	"pages": 
+	[ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
 		{
 			"path": "pages/setting/index",
 			"style": {
-				"navigationBarTitleText": "我的"
+				"navigationBarTitleText": ""
 			}
 		},
 		{
@@ -47,11 +48,36 @@
 			"path" : "components/HM-chat/HM-chat",
 			"style" :                                                                                  
 			{
-				"navigationBarTitleText": "",
-				"enablePullDownRefresh": false
+				"enablePullDownRefresh": false,
+				"app-plus": {
+					"titleNView": {
+						"buttons": [
+							{
+								"type": "menu"
+							}
+						]
+					}
+				}
 			}
+		},
+		{
+			"path" : "components/systemDialog/systemDialog",
+			"style" :                                                                                    
+			{
+					"navigationBarTitleText": "系统通知",
+					"enablePullDownRefresh": false
+			}
+			
+		},
+		{
+				"path" : "components/resign/resign",
+				"style" :                                                                                    
+				{
+						"navigationBarTitleText": "注册",
+						"enablePullDownRefresh": false
+				}
 		}
-	],
+    ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",

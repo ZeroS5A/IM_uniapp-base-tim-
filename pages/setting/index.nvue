@@ -38,7 +38,7 @@
 
 <script>
 	// 引入组件
-	import Login from "@/components/login.nvue"
+	import Login from "@/components/login/login.nvue"
 	export default {
 		components: {
 			Login
@@ -67,6 +67,13 @@
 			getUserProfile(){
 				return this.$store.state.userProfile
 			}
+		},
+		watch: {
+			isLogin(){
+				uni.setNavigationBarTitle({
+				    title: this.$store.state.isLogin?"我的":"登录"
+				});
+			},
 		},
 		methods: {
 			logout: function () {

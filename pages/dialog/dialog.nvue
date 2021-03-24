@@ -2,41 +2,45 @@
 	<view class="uni-container">
 		<uni-list>
 			<uni-list :border="false" v-for="dialog in dialogList">
-				<uni-list-chat
-					:title="getDialogName(dialog)"
-					link="true"
-					:avatar="getDialogAvatar(dialog)?getDialogAvatar(dialog):'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png'"
-					:note="`${dialog.lastMessage.messageForShow}`" time="20:20"
-					badge-positon="left"
-					:badge-text="dialog.unreadCount"
-					:to="`../../components/HM-chat/HM-chat?conversationID=${dialog.conversationID}&type=${dialog.type}&to=${getDialogTo(dialog)}`"
-				/>
+				<!-- <view @touchmove="handletouchmove" @touchstart="handletouchstart" @touchend="handletouchend" > -->
+				<!-- </view> -->
+				<uni-swipe-action>
+					<uni-swipe-action-item :right-options="options" @click="deleteDialog($event, dialog.conversationID)">
+						<uni-list-chat
+							:title="getDialogName(dialog)"
+							link="true"
+							:avatar="getDialogAvatar(dialog)?getDialogAvatar(dialog):'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png'"
+							:note="`${dialog.lastMessage.messageForShow}`" :time="dateUtils.formatTimestamp(dialog.lastMessage.lastTime)"
+							badge-positon="left"
+							:badge-text="dialog.unreadCount"
+							:to="jumpTo(dialog)"
+						/>
+					</uni-swipe-action-item>
+				</uni-swipe-action>
 			</uni-list>
 		</uni-list>
 	</view>
 </template>
 
 <script>
+	import { dateUtils } from '../../common/util.js'
 	export default {
 		data() {
 			return {
-				dialogList:{}
+				dialogList:{},
+				dateUtils,
+				options: [
+					{
+						text: '删除',
+						style: {
+							backgroundColor: '#dd524d'
+						}
+					}
+				],
 			}
 		},
 		onShow() {
-			let promise = this.Tim.getConversationList();
-			promise.then((imResponse) =>{
-			  const conversationList = imResponse.data.conversationList; // 会话列表，用该列表覆盖原有的会话列表
-				console.log(conversationList)
-				this.dialogList = conversationList
-			}).catch(function(imError) {
-				uni.showModal({
-					title: '-',
-					content: "请登录",
-					showCancel:false
-				})
-			  console.warn('getConversationList error:', imError); // 获取会话列表失败的相关信息
-			});
+			this.getDialog()
 		},
 		computed: {
 			isLogin(){
@@ -47,6 +51,54 @@
 			}
 		},
 		methods: {
+			getDialog: function (){
+				let promise = this.Tim.getConversationList();
+				promise.then((imResponse) =>{
+				  const conversationList = imResponse.data.conversationList; // 会话列表，用该列表覆盖原有的会话列表
+					console.log(conversationList)
+					this.dialogList = conversationList
+				}).catch((imError) =>{
+					uni.showModal({
+						title: '请登录',
+						// content: "",
+						showCancel:false
+					})
+					this.dialogList= {}
+				  console.warn('getConversationList error:', imError); // 获取会话列表失败的相关信息
+				});
+			},
+			deleteDialog: function (e, cid) {
+				let {
+					content
+				} = e;
+				if (content.text === '删除') {
+					uni.showModal({
+						title: '提示',
+						content: '是否删除对话',
+						success: res => {
+							if (res.confirm) {
+								let promise = this.Tim.deleteConversation(cid);
+								promise.then((imResponse) =>{
+								  //删除成功。
+								  this.getDialog()
+								}).catch(function(imError) {
+								  console.warn('deleteConversation error:', imError); // 删除会话失败的相关信息
+								});
+							} else if (res.cancel) {
+								console.log('用户点击取消');
+							}
+						}
+					});
+				} 
+			},
+			jumpTo: function (dialog) {
+				if (dialog.type === "@TIM#SYSTEM"){
+					return `../../components/systemDialog/systemDialog?conversationID=${dialog.conversationID}`
+				}
+				else
+					return `../../components/HM-chat/HM-chat?
+					conversationID=${dialog.conversationID}&type=${dialog.type}&to=${this.getDialogTo(dialog)}&toName=${this.getDialogName(dialog)}`
+			},
 			getDialogTo: function (dialog) {
 				if (dialog.type ==='C2C'){
 					return dialog.userProfile.userID
@@ -66,7 +118,7 @@
 					return dialog.userProfile.nick?dialog.userProfile.nick:dialog.userProfile.userID
 				}
 				else if (dialog.type === 'GROUP') {
-					return dialog.groupProfile.name?dialog.groupProfile.name:dialog.groupProfile.groupID
+					return `群组-${dialog.groupProfile.name?dialog.groupProfile.name:dialog.groupProfile.groupID}`
 				}
 				else if (dialog.type === "@TIM#SYSTEM") {
 					return "系统通知"
@@ -94,6 +146,27 @@
 					url: '../../components/HM-chat/HM-chat'
 				})
 			},
+			handletouchstart(e) {
+				console.log("??")
+				this.timeOutEvent = setTimeout(() => {  
+						this.onLongPress(e)  
+				}, 1000); //这里设置定时器，定义长按1000毫秒触发长按事件，时间可以自己改，  
+				return false;  
+			},  
+			handletouchend() {  
+					clearTimeout(this.time); //清除定时器    
+					if (this.time != 0) {  
+							//处理点击时间  
+					}  
+					return false;  
+			},  
+			handletouchmove() {  
+					clearTimeout(this.time); //清除定时器    
+					this.time = 0;  
+			},  
+			onLongPress(e) {  
+				console.log("??")
+			}  
 		}
 	}
 </script>

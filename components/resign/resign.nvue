@@ -1,0 +1,166 @@
+<template>
+	<u-row gutter="16" justify="center" style="margin-top: 150px;">
+		<u-col span="6">
+			<view class="demo-layout bg-purple-light">
+				
+				<u-form :model="resignData" ref="uForm" label-width='100rpx'>
+					<u-form-item label="邮箱" right="sdf"><u-input :disabled="isGetMialCode" v-model="resignData.mail" placeholder="" /></u-form-item>
+					
+					<view v-if="isGetMialCode">
+						<u-form-item label="验证码"><u-input v-model="resignData.mailCode" placeholder="" /></u-form-item>
+						<u-form-item label="用户名"><u-input  v-model="resignData.userID" placeholder="" /></u-form-item>
+						<u-form-item label="密码">
+							<u-input
+								
+								v-model="resignData.userPW" 
+								placeholder="" 
+								type='password'
+							/>
+						</u-form-item>
+						<u-form-item label="确认">
+							<u-input 
+								
+								v-model="resignData.reUserPW" 
+								placeholder="" 
+								type='password'
+							/>
+						</u-form-item>						
+					</view>
+				</u-form>
+				
+				<u-row justify="center">
+					<u-col v-if="isGetMialCode" span="6">
+						<u-button
+							shape="circle"
+							type="primary"
+							:plain="true" 
+							:ripple="true"
+							style="margin-top: 15rpx;"
+							@click="resign()"
+						>注册</u-button>
+					</u-col>
+					<u-col v-if="!isGetMialCode" span="6">
+						<u-button
+							shape="circle"
+							type="primary"
+							:plain="true" 
+							:ripple="true"
+							style="margin-top: 15rpx;"
+							@click="getMailCode()"
+						>获取验证码</u-button>
+					</u-col>
+				</u-row>
+
+			</view>
+		</u-col>
+	</u-row>
+</template>
+
+<script>
+	import { genTestUserSig } from "@/utils/getPasswd.js"
+	export default {
+		data() {
+			return {
+				title: 'Hello',
+				isGetMialCode: false,
+				resignData: {
+					userID:'ZeroS',
+					userPW:'123456',
+					reUserPW:'',
+					mail:'123@213.com',
+					mailCode:'',
+					token:''
+				}
+			}
+		},
+		onLoad() {
+		
+		},
+		methods: {
+			getMailCode: function () {
+				if(this.$u.test.email(this.resignData.mail)){
+					this.Request.GetMailCode({email:this.resignData.email})
+					.then(result=>{
+							if(result.data.code==200){
+									this.resignData.token=result.data.message
+									this.isGetMialCode=true
+									uni.showModal({
+											title: "",
+											content: "已发送至邮箱，请注意查收(10分钟有效)"
+									});
+									this.isGetMialCode=true
+							}else if(result.data.code==302){
+									uni.showModal({
+											title: "",
+											content: "邮箱已被注册，请更换！"
+									});
+									this.resignData.token=''
+							}else{
+									uni.showModal({
+											title: "",
+											content: "服务器错误！"
+									});
+							}
+							this.loading = false
+					})
+				}else{
+					uni.showModal({
+						title:"请检查邮箱"
+					})
+				}
+			},
+			resign: function () {
+				console.log("ok")
+				if (this.resignData.mailCode == '' || this.resignData.userID == '' || this.resignData.userPW == '' || this.resignData.reUserPW == ''){
+					uni.showModal({title: "检查输入"});
+					return
+				}
+				else if ( this.resignData.userPW !== this.resignData.reUserPW ){
+					uni.showModal({title: "密码不一致",});
+					return
+				}
+				else{
+					this.Request.UserRegister(
+						{
+							email:this.resignData.mail,
+							token:this.resignData.token,
+							code:this.resignData.mailCode,
+							userName:this.resignData.userID,
+							passwd:this.resignData.userPW
+						}
+					)
+					.then(result => {
+							//清空密码
+							this.resignData.userPW = ''
+							this.resignData.reUserPW = ''
+							if(result.data.code == 200){
+								uni.showToast({
+								    title: '注册成功',
+								    duration: 2000
+								});
+								this.backLogin()
+							}else if (result.data.code == 301){
+									//用户名被注册
+									uni.showModal({title: result.data.message});
+									this.resignData.userName = ''
+							}else if (result.data.code == 302){
+									//邮箱验证码错误
+									uni.showModal({title: result.data.message});
+									this.resignData.mailCode = ''
+							}
+					})
+				}
+
+			},
+			backLogin: function () {
+				uni.navigateBack({
+				    delta: 2
+				});
+			},
+		}
+	}
+</script>
+
+<style>
+
+</style>

@@ -1,10 +1,10 @@
 <template>
 	<view class="uni-container">
 		
-		<u-modal v-model="showAddGroup" title="创建群组" :show-cancel-button="true" :title-style="{color: 'red'}">
+		<u-modal v-model="showAddGroup" title="创建群组" @confirm="createNewGroup" confirm-text="创建" :show-cancel-button="true" :title-style="{color: 'red'}">
 			<u-form style="margin-left: 20rpx;">
-				<u-form-item label="群ID"><u-input  /></u-form-item>
-				<u-form-item label="群名"><u-input  /></u-form-item>
+				<u-form-item label="群ID"><u-input placeholder="请输入" /></u-form-item>
+				<u-form-item label="群名"><u-input placeholder="请输入"  /></u-form-item>
 			</u-form>
 		</u-modal>
 		
@@ -17,21 +17,28 @@
 		</uni-popup>
 		
 		<!-- <uni-list-item link title="发起会话" ></uni-list-item> -->
-		<uni-list-item link title="发起群聊" @click="showAddGroup=true"></uni-list-item>
-		<uni-list-item link title="加入群聊" @click="openDialog('addGroup')"></uni-list-item>
-		<uni-list-item link title="添加好友" @click="openDialog('addFriend')"></uni-list-item>
+		<view v-if="$store.state.isLogin">
+			<uni-list-item link title="发起群聊" @click="showAddGroup=true"></uni-list-item>
+			<uni-list-item link title="加入群聊" @click="openDialog('addGroup')"></uni-list-item>
+			<uni-list-item link title="添加好友" @click="openDialog('addFriend')"></uni-list-item>			
+		</view>
+
 		
 		<uni-list :border="false" v-for="n in userRelation" style="margin-top: 30rpx;">
-			<uni-list-item 
-				link="true"
-				showArrow="false"
-				:to="`../../components/HM-chat/HM-chat?conversationID=C2C${n.userID}&type=C2C&to=${n.userID}`"
-			>
-				<view slot="header" class="slot-box">
-					<image class="slot-image" :src="n.userAvatar?n.userAvatar:'/static/logo.png'" mode="widthFix"></image>
-				</view>
-				<text slot="body" class="slot-box slot-text">{{n.userNick?n.userNick:n.userID}}</text>
-			</uni-list-item>
+			<uni-swipe-action>
+				<uni-swipe-action-item :right-options="options" @click="deleteFriend($event, n.userID)">
+					<uni-list-item 
+						link="true"
+						showArrow="false"
+						:to="`../../components/HM-chat/HM-chat?conversationID=C2C${n.userID}&type=C2C&to=${n.userID}&toName=${n.userID}`"
+					>
+						<view slot="header" class="slot-box">
+							<image class="slot-image" :src="n.userAvatar?n.userAvatar:'/static/logo.png'" mode="widthFix"></image>
+						</view>
+						<text slot="body" class="slot-box slot-text">{{n.userNick?n.userNick:n.userID}}</text>
+					</uni-list-item>
+				</uni-swipe-action-item>
+			</uni-swipe-action>
 		</uni-list>
 	</view>
 </template>
@@ -42,15 +49,23 @@
 		data() {
 			return {
 				userRelation:[
-					{
-						userID:'',
-						userAvatar:'',
-						userNick:''
-					}
+					// {
+					// 	userID:'',
+					// 	userAvatar:'',
+					// 	userNick:''
+					// }
 				],
 				showAddGroup:false,
 				addUserID:'',
-				addGroupID:''
+				addGroupID:'',
+				options: [
+					{
+						text: '删除',
+						style: {
+							backgroundColor: '#dd524d'
+						}
+					}
+				],
 			}
 		},
 		computed:{
@@ -59,9 +74,47 @@
 			}
 		},
 		onShow() {
-			this.getUserRelation()
+			if (!this.$store.state.isLogin){
+				uni.showModal({
+					title: '请登录',
+					// content: "",
+					showCancel:false
+				})
+				this.userRelation= []
+			}else{
+				this.getUserRelation()
+			}
+
 		},
 		methods: {
+			deleteFriend: function (e, id) {
+				let {
+					content
+				} = e;
+				if (content.text === '删除') {
+					uni.showModal({
+						title: '提示',
+						content: '是否删除好友',
+						success: res => {
+							if (res.confirm) {
+								// 删除
+								this.Request.DeleteUserRelation({userID1:this.getUserProfile.userID,userID2:id})
+								.then(res=>{
+									if(res.data.code == 200){
+										uni.showToast({
+											title:"已删除",
+											duration:1000
+										})
+										this.getUserRelation()
+									}
+								})
+							} else if (res.cancel) {
+								console.log('用户点击取消');
+							}
+						}
+					});
+				} 
+			},
 			getUserRelation(){
 				this.Request.GetUserRelation(this.getUserProfile.userID)
 				.then((res)=>{
@@ -69,6 +122,8 @@
 					this.transUserRelation(res.data.data.UserProfileItem)
 				})
 			},
+			
+			// 处理返回的用户信息
 			transUserRelation(relation){
 				if (!relation){
 					this.userRelation = []
@@ -95,9 +150,13 @@
 				console.log(reaList)
 				this.userRelation = reaList
 			},
+			
+			// 打开对应的对话框
 			openDialog(type){
 				this.$refs[type].open()
 			},
+			
+			// 点击添加好友
 			handleAddFriend(done, val) {
 				uni.showLoading({
 					title: '正在查找'
@@ -107,11 +166,13 @@
 				this.Request.AddUserRelation({userID:this.getUserProfile.userID,userName:val})
 				.then(res=>{
 					console.log(res)
+					uni.hideLoading()
 					if(res.data.code == 200){
 						uni.showToast({
 						    title: '添加成功',
 						    duration: 2000
 						});
+						done()
 						this.getUserRelation()
 					}
 					else{
@@ -121,9 +182,6 @@
 						    duration: 2000
 						});
 					}
-					uni.hideLoading()
-					// 关闭窗口后，恢复默认内容
-					done()
 				})
 				// setTimeout(() => {
 				// 	uni.hideLoading()
@@ -134,9 +192,9 @@
 			
 			// 查找群信息
 			handleAddGroup(done, val){
-				let promise = this.Tim.getGroupProfile({ groupID: val, groupCustomFieldFilter: ['open'] });
+				let promise = this.Tim.searchGroupByID(val);
 				promise.then((imResponse) => {
-				  console.log(imResponse.data.group);
+				  const group = imResponse.data.group; // 群组信息
 					uni.showModal({
 					    title: '是否申请加入',
 					    content: imResponse.data.group.name,
@@ -151,7 +209,7 @@
 					    }
 					});
 				}).catch(function(imError) {
-				  console.warn('getGroupProfile error:', imError); // 获取群详细资料失败的相关信息
+				  console.warn('searchGroupByID error:', imError); // 搜素群组失败的相关信息
 					uni.showToast({
 					    title: '没有找到该群',
 							icon:'none',
@@ -192,23 +250,24 @@
 			
 			// 创建群
 			createNewGroup(){
-				// 创建好友工作群
-				let promise = tim.createGroup({
-				  type: TIM.TYPES.GRP_WORK,
-				  name: 'WebSDK',
-				  memberList: [{
-				    userID: 'user1',
-				    // 群成员维度的自定义字段，默认情况是没有的，需要开通，详情请参阅自定义字段
-				    memberCustomField: [{key: 'group_member_test', value: 'test'}]
-				  }, {
-				    userID: 'user2'
-				  }] // 如果填写了 memberList，则必须填写 userID
-				});
-				promise.then(function(imResponse) { // 创建成功
-				  console.log(imResponse.data.group); // 创建的群的资料
-				}).catch(function(imError) {
-				  console.warn('createGroup error:', imError); // 创建群组失败的相关信息
-				});
+				console.log("创建群聊")
+				// // 创建好友工作群
+				// let promise = tim.createGroup({
+				//   type: TIM.TYPES.GRP_WORK,
+				//   name: 'WebSDK',
+				//   memberList: [{
+				//     userID: 'user1',
+				//     // 群成员维度的自定义字段，默认情况是没有的，需要开通，详情请参阅自定义字段
+				//     memberCustomField: [{key: 'group_member_test', value: 'test'}]
+				//   }, {
+				//     userID: 'user2'
+				//   }] // 如果填写了 memberList，则必须填写 userID
+				// });
+				// promise.then(function(imResponse) { // 创建成功
+				//   console.log(imResponse.data.group); // 创建的群的资料
+				// }).catch(function(imError) {
+				//   console.warn('createGroup error:', imError); // 创建群组失败的相关信息
+				// });
 			}
 		}
 	}

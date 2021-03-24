@@ -54,6 +54,15 @@ export default {
 	AddUserRelation(postData){
 		return instance.post("/user/addUserRelation",postData)
 	},
+	DeleteUserRelation(postData){
+		return instance.post("/user/deleteUserRelation",postData)
+	},
+	GetMailCode(data){
+		return instance.post("/user/getMailCode",data)
+	},
+	UserRegister(data){
+		return instance.post("/user/userRegister",data)
+	},
 	Test(){
 	  return instance.post("/hello")
 	}

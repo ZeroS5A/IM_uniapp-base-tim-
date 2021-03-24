@@ -57,12 +57,23 @@ var dateUtils = {
 		var _format = function (number) {
 			return (number < 10 ? ('0' + number) : number);
 		};
-		return date.getFullYear() + '/' + _format(date.getMonth() + 1) + '/' + _format(date.getDate()) + '-' +
-			_format(date.getHours()) + ':' + _format(date.getMinutes());
+		return date.getFullYear() + '-' + _format(date.getMonth() + 1) + '-' + _format(date.getDate())
+		 + '-' + _format(date.getHours()) + ':' + _format(date.getMinutes());
 	},
 	parse: function (str) { //将"yyyy-mm-dd HH:MM:ss"格式的字符串，转化为一个Date对象
 		var a = str.split(/[^0-9]/);
 		return new Date(a[0], a[1] - 1, a[2], a[3], a[4], a[5]);
+	},
+	formatTimestamp: function (timestamp) {
+		 let time = new Date(timestamp*1000)
+		 let year = time.getFullYear()
+		 const month = (time.getMonth() + 1).toString().padStart(2, '0')
+		 const date = (time.getDate()).toString().padStart(2, '0')
+		 const hours = (time.getHours()).toString().padStart(2, '0')
+		 const minute = (time.getMinutes()).toString().padStart(2, '0')
+		 const second = (time.getSeconds()).toString().padStart(2, '0')
+
+		 return this.format(year + '-' + month + '-' + date + ' ' + hours + ':' + minute + ':' + second)
 	}
 };
 

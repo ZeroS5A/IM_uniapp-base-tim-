@@ -1,0 +1,302 @@
+<template>
+	<view>
+		
+		<u-modal v-model="showJoinGroup" title="是否同意":show-confirm-button="false"  :show-cancel-button="true" :title-style="{color: 'red'}">
+			<u-row justify="space-between" style="padding: 20rpx;">
+				<u-col span="6" text-align="center"><u-button type="primary" size="medium" @click="handelJoinGroup('Agree')" >同意</u-button></u-col>
+				<u-col span="6" text-align="center"><u-button type="error" size="medium" @click="handelJoinGroup('Reject')" >拒绝</u-button></u-col>
+			</u-row>
+		</u-modal>
+		
+		<scroll-view class="msg-list" scroll-y="true" :scroll-with-animation="scrollAnimation" :scroll-top="scrollTop" :scroll-into-view="scrollToView" @scrolltoupper="loadHistory" upper-threshold="50">
+			<!-- 加载历史数据waitingUI -->
+			<view v-if="isHistoryLoading" class="loading">
+				<view class="spinner">
+					<view class="rect1"></view>
+					<view class="rect2"></view>
+					<view class="rect3"></view>
+					<view class="rect4"></view>
+					<view class="rect5"></view>
+				</view>
+			</view>
+			<view class="row" v-for="(row,index) in msgList" :key="index" :id="'msg'+row.msg.id">
+				<!-- 加群请求 -->
+				<u-card v-if="row.type == 'GroupJoinApply'" title="群系统通知" sub-title="23:24">
+					<view class="" slot="body">
+						<u-row>
+							<u-col span="8">{{row.msg.payload.operatorID}} 申请加入群 {{row.msg.payload.groupProfile.name}}</u-col>
+							<u-col span="4">
+								<u-button type="primary" size="medium" @click="openModel('showJoinGroup',row.msg)">操作</u-button>
+							</u-col>
+						</u-row>
+					</view>
+					<!-- <view class="" slot="foot"><u-icon name="chat-fill" size="34" color="" label="30评论"></u-icon></view> -->
+				</u-card>
+				
+				<!-- 群信息 -->
+				<u-card v-if="row.type == 'GroupMessage'" title="群系统通知" sub-title="23:24">
+					<view class="" slot="body">
+						<u-row>
+							<u-col span="12">{{row.msg}}</u-col>
+						</u-row>
+					</view>
+					<!-- <view class="" slot="foot"><u-icon name="chat-fill" size="34" color="" label="30评论"></u-icon></view> -->
+				</u-card>
+				
+				<!-- 其他信息 -->
+				<u-card v-if="row.type == 'OterMessage'" title="未处理" sub-title="23:24">
+					<view class="" slot="body">
+						<u-row>
+							<u-col span="12">{{row.msg.payload}}</u-col>
+						</u-row>
+					</view>
+					<!-- <view class="" slot="foot"><u-icon name="chat-fill" size="34" color="" label="30评论"></u-icon></view> -->
+				</u-card>
+			</view>
+		</scroll-view>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				isHistoryLoading:true,
+				scrollAnimation:false,
+				scrollTop:0,
+				scrollToView:'',
+				msgList:[],
+				
+				showJoinGroup:false,
+				
+				// 申请加群信息实体
+				joinGroupMessage:'',
+				
+				dialogData: {
+					conversationID:'',
+					nextReqMessageID :'',
+					isCompleted: false
+				},
+				userinfo:this.$store.state.userProfile,
+			}
+		},
+		computed: {
+			getNewMessage() {
+				return this.$store.state.newMessage
+			}
+		},
+		watch: {
+			getNewMessage(msgs){
+				console.log("收到！",msgs)
+				msgs.forEach((msg)=>{
+					if (msg.conversationID === this.dialogData.conversationID){
+						this.msgList.unshift(this.transMsg(msg))
+						this.transEnd()
+					}
+				})
+			}
+		},
+		onLoad(option) {
+			this.getMsgList(option)
+		},
+		onShow() {
+			this.scrollTop=99999
+		},
+		methods: {
+			openModel(name, val){
+				this[name]=true
+				this.joinGroupAuthentication = val
+			},
+			
+			// 加载初始页面消息
+			getMsgList(option){
+				console.log(option)
+				// let list = []
+				// 拉取信息
+				let promise = this.Tim.getMessageList({conversationID: option.conversationID, count: 15});
+				promise.then((imResponse) => {
+				  const messageList = imResponse.data.messageList; // 消息列表。
+				  const nextReqMessageID = imResponse.data.nextReqMessageID; // 用于续拉，分页续拉时需传入该字段。
+				  const isCompleted = imResponse.data.isCompleted; // 表示是否已经拉完所有消息。
+					
+					this.dialogData = {
+						conversationID: option.conversationID,
+						nextReqMessageID,
+						isCompleted,
+						type: option.type,
+						to: option.to
+					}
+					
+					console.log(messageList)
+					messageList.forEach((msg)=>{
+						// console.log(msg)
+						this.msgList.unshift(this.transMsg(msg))
+					})
+					
+					this.transEnd()
+					
+				});
+			},
+			
+			// 移动到底部，并设置已读
+			transEnd(){
+				this.$nextTick(function() {
+					//进入页面滚动到底部
+					this.scrollTop = 9999;
+					this.$nextTick(function() {
+						this.scrollAnimation = true;
+					});
+				});
+				// 将某会话下所有未读消息已读上报
+				let promise = this.Tim.setMessageRead({conversationID: this.dialogData.conversationID});
+				promise.then(function(imResponse) {
+				  // 已读上报成功，指定 ID 的会话的 unreadCount 属性值被置为0
+				}).catch(function(imError) {
+				  // 已读上报失败
+				  console.warn('setMessageRead error:', imError);
+				});
+			},
+			
+			// 处理接收的信息
+			transMsg(msg) {
+				// console.log(msg)
+				if (msg.type == "TIMGroupSystemNoticeElem"){
+					if (msg.payload.operationType == 1){
+						return({type:"GroupJoinApply",msg})
+					}
+					else if (msg.payload.operationType == 3){
+						return({type:"GroupMessage",msg:`申请加入群${msg.payload.groupProfile.name}被拒绝`})
+					}
+					else if (msg.payload.operationType == 2){
+						return({type:"GroupMessage",msg:`申请加入群${msg.payload.groupProfile.name}已通过`})
+					}
+					else if (msg.payload.operationType == 4){
+						return({type:"GroupMessage",msg:`你已经被移除群${msg.payload.groupProfile.name}`})
+					}
+					else {
+						return({type:"OterMessage",msg:`${msg.payload}`})
+					}
+				}
+				else if (msg.type == "TIMCustomElem"){
+					return({type:"system",msg:{id:msg.ID,type:"text",content:{text:msg.payload.extension}}})
+				}
+				else if (msg.type == "TIMGroupTipElem"){
+					return({type:"system",msg:{id:msg.ID,type:"text",content:{text:"群成员变化"}}})
+				}
+				else{
+					return({type:"system",msg:{id:0,type:"text",content:{text:"未处理错误"}}})
+				}
+			},
+			
+			// 触发滑动到顶部(加载历史信息记录)
+			loadHistory(e){
+				if(this.isHistoryLoading){
+					return ;
+				}
+				this.isHistoryLoading = true;//参数作为进入请求标识，防止重复请求
+				this.scrollAnimation = false;//关闭滑动动画
+				let Viewid = this.msgList[0].msg.id;//记住第一个信息ID
+				// 本地模拟请求历史记录效果
+				setTimeout(()=>{
+					// 消息列表
+					// let list = [
+					// 	{type:"user",msg:{id:1,type:"text",time:"12:56",userinfo:{uid:0,username:"大黑哥",face:"/static/img/face.jpg"},content:{text:"为什么温度会相差那么大？"}}},
+					// 	{type:"user",msg:{id:2,type:"text",time:"12:57",userinfo:{uid:1,username:"售后客服008",face:"/static/img/im/face/face_2.jpg"},content:{text:"这个是有偏差的，两个温度相差十几二十度是很正常的，如果相差五十度，那即是质量问题了。"}}},
+					// 	{type:"user",msg:{id:3,type:"voice",time:"12:59",userinfo:{uid:1,username:"售后客服008",face:"/static/img/im/face/face_2.jpg"},content:{url:"/static/voice/1.mp3",length:"00:06"}}},
+					// 	{type:"user",msg:{id:4,type:"voice",time:"13:05",userinfo:{uid:0,username:"大黑哥",face:"/static/img/face.jpg"},content:{url:"/static/voice/2.mp3",length:"00:06"}}},
+					// ]
+				if(this.dialogData.isCompleted){
+					this.isHistoryLoading = false;
+					// uni.showModal({
+					// 	title: '-',
+					// 	content: "已经到顶了~",
+					// 	showCancel:false
+					// })
+					return
+				}
+				
+				let list = []
+				
+				// 下拉查看更多消息
+				let promise = this.Tim.getMessageList({conversationID: this.dialogData.conversationID, nextReqMessageID:this.dialogData.nextReqMessageID, count: 15});
+				promise.then((imResponse) =>{
+					const nextReqMessageID = imResponse.data.nextReqMessageID; // 用于续拉，分页续拉时需传入该字段。
+					const isCompleted = imResponse.data.isCompleted; // 表示是否已经拉完所有消息。
+					
+					this.dialogData = {
+						...this.dialogData,
+						nextReqMessageID,
+						isCompleted
+					}
+					
+					const messageList = imResponse.data.messageList; // 消息列表。
+					
+					messageList.forEach((msg)=>{
+						list.push(this.transMsg(msg))
+					})
+					
+					console.log(list)
+					// 获取消息中的图片,并处理显示尺寸
+					for(let i=list.length-1;i>0;i--){
+						if(list[i].type=='user'&&list[i].msg.type=="img"){
+							list[i].msg.content = this.setPicSize(list[i].msg.content);
+							this.msgImgList.unshift(list[i].msg.content.url);
+						}
+						list[i].msg.id = Math.floor(Math.random()*1000+1);
+						this.msgList.unshift(list[i]);
+					}
+					
+					//这段代码很重要，不然每次加载历史数据都会跳到顶部
+					this.$nextTick(function() {
+						this.scrollToView = 'msg'+Viewid;//跳转上次的第一行信息位置
+						this.$nextTick(function() {
+							this.scrollAnimation = true;//恢复滚动动画
+						});
+						
+					});
+					this.isHistoryLoading = false;
+											
+				});
+					
+				},1000)
+			},
+			
+			// 处理加群请求
+			handelJoinGroup(type){
+				let promise = this.Tim.handleGroupApplication({
+				  handleAction: type,
+				  handleMessage: '欢迎欢迎',
+				  message: this.joinGroupAuthentication // 申请加群群系统通知的消息实例
+				});
+				promise.then((imResponse) =>{
+				  console.log(imResponse.data.group); // 群组资料
+					// this.getMsgList({conversationID: this.dialogData.conversationID})
+					this.showJoinGroup=false
+				}).catch(function(imError){
+				  console.warn('handleGroupApplication error:', imError); // 错误信息
+				});
+			}
+		}
+	}
+</script>
+
+<style scoped lang="scss">
+	.u-card-wrap { 
+		background-color: $u-bg-color;
+		padding: 1px;
+	}
+	
+	.u-body-item {
+		font-size: 32rpx;
+		color: #333;
+		padding: 20rpx 10rpx;
+	}
+		
+	.u-body-item-right  {
+		width: 200rpx;
+		flex: 0 0 120rpx;
+		height: 120rpx;
+		border-radius: 8rpx;
+		margin-left: 12rpx;
+	}
+</style>

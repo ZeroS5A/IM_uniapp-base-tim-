@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<view class="content" @touchstart="hideDrawer">
+		<view class="content" @touchstart="hideDrawer" >
 			<scroll-view class="msg-list" scroll-y="true" :scroll-with-animation="scrollAnimation" :scroll-top="scrollTop" :scroll-into-view="scrollToView" @scrolltoupper="loadHistory" upper-threshold="50">
 				<!-- 加载历史数据waitingUI -->
 				<view v-if="isHistoryLoading" class="loading">
@@ -187,6 +187,7 @@
 </template>
 <script>
 	import TIM from 'tim-js-sdk';
+	import { dateUtils } from '../../common/util.js'
 	export default {
 		data() {
 			return {
@@ -200,6 +201,8 @@
 				msgList:[],
 				msgImgList:[],
 				myuid:0,
+				
+				dateUtils,
 				
 				//录音相关参数
 				// #ifndef H5
@@ -251,6 +254,9 @@
 				userinfo:this.$store.state.userProfile,
 			};
 		},
+		onNavigationBarButtonTap(e) {
+			console.log(e)
+		},
 		// 收到新信息触发
 		computed: {
 			getNewMessage() {
@@ -270,6 +276,10 @@
 		},
 		onLoad(option) {
 			this.getMsgList(option);
+			
+			uni.setNavigationBarTitle({
+			    title: option.toName
+			});
 			
 			//语音自然播放结束
 			this.AUDIO.onEnded((res)=>{
@@ -306,6 +316,12 @@
 			});
 		},
 		methods:{
+			back: function () {
+				console.log("??")
+				uni.navigateBack({
+				    delta: 1
+				});
+			},
 			// 接受消息(筛选处理)
 			screenMsg(msg){
 				//从长连接处转发给这个方法，进行筛选处理
@@ -424,7 +440,7 @@
 			// 处理接受的信息
 			transMsg(msg) {
 				if (msg.type == "TIMTextElem"){
-					return({type:"user",msg:{id:msg.ID,type:"text",time:"12:56",userinfo:{uid:msg.flow=='in'?1:0,username:msg.from,face:msg.avatar},content:msg.payload}})
+					return({type:"user",msg:{id:msg.ID,type:"text",time:dateUtils.formatTimestamp(msg.time),userinfo:{uid:msg.flow=='in'?1:0,username:msg.from,face:msg.avatar},content:msg.payload}})
 				}
 				else if (msg.type == "TIMCustomElem"){
 					return({type:"system",msg:{id:msg.ID,type:"text",content:{text:msg.payload.extension}}})
@@ -506,7 +522,7 @@
 				
 			},
 			
-			//移动到底部
+			//移动到底部&已读上报
 			transEnd(){
 				// 获取消息中的图片,并处理显示尺寸
 				// for(let i=0;i<list.length;i++){
@@ -523,6 +539,14 @@
 					this.$nextTick(function() {
 						this.scrollAnimation = true;
 					});
+				});
+				// 将某会话下所有未读消息已读上报
+				let promise = this.Tim.setMessageRead({conversationID: this.dialogData.conversationID});
+				promise.then(function(imResponse) {
+				  // 已读上报成功，指定 ID 的会话的 unreadCount 属性值被置为0
+				}).catch(function(imError) {
+				  // 已读上报失败
+				  console.warn('setMessageRead error:', imError);
 				});
 			},
 			
@@ -917,7 +941,8 @@
 			},
 			discard(){
 				return;
-			}
+			},
+
 		}
 	}
 </script>

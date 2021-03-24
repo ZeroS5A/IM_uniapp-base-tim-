@@ -13,24 +13,25 @@
 						/>
 					</u-form-item>
 				</u-form>
-				<u-row gutter="16" justify="center">
-					<u-col span="8">
+				<u-row justify="center">
+					<u-col span="6">
 						<u-button 
 							type="primary" 
 							shape="circle" 
 							:plain="true" 
 							:ripple="true" 
 							ripple-bg-color="#909399"
-							style="width: 80%;margin-top: 15rpx;"
+							style="margin-top: 15rpx;"
 							@click="login()"
 						>登录</u-button>						
 					</u-col>
-					<u-col span="8">
+					<u-col span="6">
 						<u-button
 							shape="circle"
 							:plain="true" 
 							:ripple="true"
-							style="width: 80%;margin-top: 15rpx;"
+							style="margin-top: 15rpx;"
+							@click="resign()"
 						>注册</u-button>
 					</u-col>
 				</u-row>
@@ -41,7 +42,7 @@
 </template>
 
 <script>
-	import { genTestUserSig } from "../utils/getPasswd.js"
+	import { genTestUserSig } from "@/utils/getPasswd.js"
 	export default {
 		data() {
 			return {
@@ -56,6 +57,10 @@
 		
 		},
 		methods: {
+			resign: function () {
+				console.log("???")
+				uni.navigateTo({url: '/components/resign/resign'});
+			},
 			login: function () {
 				// this.Request.UserLogin(this.loginData)
 				// this.setStorage(true)
