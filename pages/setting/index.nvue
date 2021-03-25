@@ -38,7 +38,7 @@
 
 <script>
 	// 引入组件
-	import Login from "@/components/login/login.nvue"
+	import Login from "@/pages/components/login/login.nvue"
 	export default {
 		components: {
 			Login

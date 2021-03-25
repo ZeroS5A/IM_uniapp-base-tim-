@@ -21,7 +21,7 @@
 			</view>
 			<view class="row" v-for="(row,index) in msgList" :key="index" :id="'msg'+row.msg.id">
 				<!-- 加群请求 -->
-				<u-card v-if="row.type == 'GroupJoinApply'" title="群系统通知" sub-title="23:24">
+				<u-card v-if="row.type == 'GroupJoinApply'" title="群系统通知" :sub-title="dateUtils.formatTimestamp(row.time)">
 					<view class="" slot="body">
 						<u-row>
 							<u-col span="8">{{row.msg.payload.operatorID}} 申请加入群 {{row.msg.payload.groupProfile.name}}</u-col>
@@ -34,7 +34,7 @@
 				</u-card>
 				
 				<!-- 群信息 -->
-				<u-card v-if="row.type == 'GroupMessage'" title="群系统通知" sub-title="23:24">
+				<u-card v-if="row.type == 'GroupMessage'" title="群系统通知" :sub-title="dateUtils.formatTimestamp(row.time)">
 					<view class="" slot="body">
 						<u-row>
 							<u-col span="12">{{row.msg}}</u-col>
@@ -44,7 +44,7 @@
 				</u-card>
 				
 				<!-- 其他信息 -->
-				<u-card v-if="row.type == 'OterMessage'" title="未处理" sub-title="23:24">
+				<u-card v-if="row.type == 'OterMessage'" title="未处理" :sub-title="dateUtils.formatTimestamp(row.time)">
 					<view class="" slot="body">
 						<u-row>
 							<u-col span="12">{{row.msg.payload}}</u-col>
@@ -58,6 +58,7 @@
 </template>
 
 <script>
+	import { dateUtils } from '@/common/util.js'
 	export default {
 		data() {
 			return {
@@ -71,6 +72,8 @@
 				
 				// 申请加群信息实体
 				joinGroupMessage:'',
+				
+				dateUtils,
 				
 				dialogData: {
 					conversationID:'',
@@ -161,20 +164,25 @@
 			transMsg(msg) {
 				// console.log(msg)
 				if (msg.type == "TIMGroupSystemNoticeElem"){
-					if (msg.payload.operationType == 1){
-						return({type:"GroupJoinApply",msg})
-					}
-					else if (msg.payload.operationType == 3){
-						return({type:"GroupMessage",msg:`申请加入群${msg.payload.groupProfile.name}被拒绝`})
-					}
-					else if (msg.payload.operationType == 2){
-						return({type:"GroupMessage",msg:`申请加入群${msg.payload.groupProfile.name}已通过`})
-					}
-					else if (msg.payload.operationType == 4){
-						return({type:"GroupMessage",msg:`你已经被移除群${msg.payload.groupProfile.name}`})
-					}
-					else {
-						return({type:"OterMessage",msg:`${msg.payload}`})
+					switch (msg.payload.operationType){
+						case 1:
+							return({type:"GroupJoinApply",msg})
+						case 3:
+							return({type:"GroupMessage",time:msg.time, msg:`申请加入群 "${msg.payload.groupProfile.name}" 被拒绝`})
+						case 2:
+							return({type:"GroupMessage",time:msg.time, msg:`申请加入群 "${msg.payload.groupProfile.name}" 已通过`})
+						case 4:
+							return({type:"GroupMessage",time:msg.time, msg:`你已经被移除群 "${msg.payload.groupProfile.name}"`})
+						case 5:
+							return({type:"GroupMessage",time:msg.time, msg:`群 "${msg.payload.groupProfile.name}" 解散`})
+						case 6:
+							return({type:"GroupMessage",time:msg.time, msg:`群 "${msg.payload.groupProfile.name}" 创建`})
+						case 7:
+							return({type:"GroupMessage",time:msg.time, msg:`群 "${msg.payload.groupProfile.name}" 资料变更`})
+						case 8:
+							return({type:"GroupMessage",time:msg.time, msg:`已退出群 "${msg.payload.groupProfile.name}" `})
+						default:
+							return({type:"OterMessage",time:msg.time, msg:`${msg.payload}`})						
 					}
 				}
 				else if (msg.type == "TIMCustomElem"){

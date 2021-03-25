@@ -61,7 +61,14 @@
 					uni.showModal({
 						title: '请登录',
 						// content: "",
-						showCancel:false
+						showCancel:false,
+						success: function (res) {
+							if (res.confirm) {
+								uni.switchTab({
+								    url: '/pages/setting/index'
+								});
+							}
+						}
 					})
 					this.dialogList= {}
 				  console.warn('getConversationList error:', imError); // 获取会话列表失败的相关信息
@@ -93,7 +100,7 @@
 			},
 			jumpTo: function (dialog) {
 				if (dialog.type === "@TIM#SYSTEM"){
-					return `../../components/systemDialog/systemDialog?conversationID=${dialog.conversationID}`
+					return `../../pages/components/systemDialog/systemDialog?conversationID=${dialog.conversationID}`
 				}
 				else
 					return `../../components/HM-chat/HM-chat?

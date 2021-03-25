@@ -1,0 +1,121 @@
+<template>
+	<view>
+		<!-- <uni-group title="群成员" top="0"> -->
+		<u-row>
+			<view v-for="m in memberList">
+				<view style="margin: 20rpx; display: flex; justify-content: center; align-items: center;">
+					<u-avatar :src="m.avatar" >{{m.userID}}</u-avatar>
+					<text>{{m.userID}}</text>
+				</view>
+			</view>
+		</u-row>
+		<!-- </uni-group> -->
+		<uni-group title="群信息" style="padding: 0">
+			<uni-list-item title="群ID" :rightText="groupID" />
+			<uni-list-item title="群名" :rightText="groupName" />
+			<uni-list-item title="群主" :rightText="groupOwner" />
+			
+		</uni-group>
+		<uni-group title="操作">
+			<uni-list-item @click="GroupOption('quitGroup')" link v-if="userID !== groupOwner">
+				<text slot="body" class="slot-box slot-text">退出群聊</text>
+			</uni-list-item>
+			<uni-list-item @click="GroupOption('dismissGroup')" link v-if="userID === groupOwner">
+				<text slot="body" class="slot-box slot-text">解散群聊</text>
+			</uni-list-item>
+			
+		</uni-group>
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				groupID:'',
+				memberList: [],
+				groupOwner: '',
+				groupName: ''
+			}
+		},
+		computed:{
+			userID(){
+				return this.$store.state.userProfile.userID
+			}
+		},
+		onLoad(data) {
+			console.log(data)
+			this.groupID = data.groupID
+			this.getGroupProfile()
+			this.getGroupMember()
+		},
+		methods: {
+			GroupOption(type) {
+				uni.showModal({
+					title:'警告',
+					content:`是否${type=="quitGroup"?'退出':'解散'}群聊`,
+					confirmColor:'red',
+					success:(res) => {
+						if(res.confirm){
+							let promise = this.Tim[type](this.groupID);
+							promise.then(function(imResponse) {
+								console.log(imResponse.data.groupID); // 退出成功的群 ID
+								uni.navigateBack({
+									delta:2
+								})
+							}).catch(function(imError){
+								console.warn('quitGroup error:', imError); // 退出群组失败的相关信息
+							});
+						}
+					}
+				})
+
+			},
+			getGroupProfile() {
+				let promise = this.Tim.getGroupProfile({ groupID: this.groupID });
+				promise.then((imResponse) => {
+					console.log(imResponse.data.group);
+					this.groupOwner = imResponse.data.group.ownerID
+					this.groupName = imResponse.data.group.name
+				}).catch(function(imError) {
+					console.warn('getGroupProfile error:', imError); // 获取群详细资料失败的相关信息
+				});				
+			},
+			getGroupMember() {
+				let promise = this.Tim.getGroupMemberList({ groupID: this.groupID, count: 30, offset:0 }); // 从0开始拉取30个群成员
+				promise.then((imResponse) => {
+				  console.log(imResponse.data.memberList); // 群成员列表
+					this.memberList = imResponse.data.memberList
+				}).catch(function(imError) {
+				  console.warn('getGroupMemberList error:', imError);
+				});
+			}
+		}
+	}
+</script>
+
+<style>
+	.slot-box {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.slot-image {
+		/* #ifndef APP-NVUE */
+		display: block;
+		/* #endif */
+		margin-right: 10px;
+		width: 30px;
+		height: 30px;
+	}
+
+	.slot-text {
+		flex: 1;
+		font-size: 14px;
+		color: red;
+		margin-right: 10px;
+	}
+</style>

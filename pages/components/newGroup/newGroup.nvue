@@ -1,0 +1,126 @@
+<template>
+	<view>
+		<u-form style="margin-left: 20rpx;">
+			<u-form-item label="群ID"><u-input v-model="groupID" placeholder="唯一ID,不可修改" /></u-form-item>
+			<u-form-item label="群名"><u-input v-model="groupName" placeholder="可修改"  /></u-form-item>
+		</u-form>
+		<u-divider style="margin-top: 30rpx;">选择成员</u-divider>
+		<uni-list :border="false" style="margin-top: 30rpx;">
+			<checkbox-group @change="changeSelectUser">
+			<uni-list-item v-for="n in userRelation">
+				<view slot="header" class="slot-box">
+					<image class="slot-image" :src="n.userAvatar?n.userAvatar:'/static/logo.png'" mode="widthFix"></image>
+				</view>
+				<text slot="body" class="slot-box slot-text">{{n.userNick?n.userNick:n.userID}}</text>
+				<checkbox slot="footer" :value="n.userID" style="transform:scale(0.8)"></checkbox>
+			</uni-list-item>
+			</checkbox-group>
+		</uni-list>
+		<view class="input-box">
+			<u-button type="primary" @click="createNewGroup">创建</u-button>
+		</view>
+	</view>
+</template>
+
+<script>
+	import TIM from 'tim-js-sdk';
+	export default {
+		data() {
+			return {
+				selectUsers: [],
+				groupID: "",
+				groupName: ""
+			}
+		},
+		computed:{
+			userRelation(){
+				return this.$store.state.userRelation
+			}
+		},
+		methods: {
+			changeSelectUser(e) {
+				console.log(e.detail.value)
+				this.selectUsers = e.detail.value
+			},
+			// 创建群
+			createNewGroup(){
+				if (this.groupID == '' || this.groupName == ''){
+					uni.showModal({
+						title: '检查输入',
+						// content: "",
+						showCancel:false
+					})
+					return
+				}
+				console.log("创建群聊")
+				// 创建好友工作群
+				let promise = this.Tim.createGroup({
+				  type: TIM.TYPES.GRP_PUBLIC,
+					groupID: this.groupID,
+				  name: this.groupName,
+				  memberList: this.selectUsers.map(n=>{return({userID:n})})
+				});
+				promise.then(function(imResponse) { // 创建成功
+				  console.log(imResponse.data.group); // 创建的群的资料
+					uni.showModal({
+						title:"创建成功！",
+						showCancel:false,
+						success(res) {
+							if (res.confirm){
+								uni.navigateBack({
+									delta:1
+								})
+							}
+						}
+					})
+				}).catch(function(imError) {
+				  console.warn('createGroup error:', imError); // 创建群组失败的相关信息
+					uni.showModal({
+						title:"错误",
+						showCancel:false,
+						content:imError.message
+					})
+				});
+			}
+		}
+	}
+</script>
+
+<style>
+	.slot-box {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+	}
+
+	.slot-image {
+		/* #ifndef APP-NVUE */
+		display: block;
+		/* #endif */
+		margin-right: 15px;
+		width: 30px;
+		height: 30px;
+	}
+
+	.slot-text {
+		flex: 1;
+		font-size: 15px;
+		font-weight: bold;
+		/* color: #4cd964; */
+		margin-right: 10px;
+	}
+	
+	.input-box {
+		width: 100%;
+		min-height: 100upx;
+		background-color: #f2f2f2;
+		position: fixed;
+		z-index: 20;
+		bottom:-2upx;
+		&.showLayer{transform: translate3d(0,-42vw,0);}
+		transition: all .15s linear;
+		border-bottom: solid 1upx #ddd;
+	}
+</style>

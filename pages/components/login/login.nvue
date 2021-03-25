@@ -58,8 +58,7 @@
 		},
 		methods: {
 			resign: function () {
-				console.log("???")
-				uni.navigateTo({url: '/components/resign/resign'});
+				uni.navigateTo({url: '/pages/components/resign/resign'});
 			},
 			login: function () {
 				// this.Request.UserLogin(this.loginData)

@@ -1,13 +1,6 @@
 <template>
 	<view class="uni-container">
 		
-		<u-modal v-model="showAddGroup" title="创建群组" @confirm="createNewGroup" confirm-text="创建" :show-cancel-button="true" :title-style="{color: 'red'}">
-			<u-form style="margin-left: 20rpx;">
-				<u-form-item label="群ID"><u-input placeholder="请输入" /></u-form-item>
-				<u-form-item label="群名"><u-input placeholder="请输入"  /></u-form-item>
-			</u-form>
-		</u-modal>
-		
 		<uni-popup id="addFriend" ref="addFriend" type="dialog">
 			<uni-popup-dialog mode="input" title="查找用户" :value="addUserID" placeholder="输入用户ID" @confirm="handleAddFriend"></uni-popup-dialog>
 		</uni-popup>
@@ -17,11 +10,9 @@
 		</uni-popup>
 		
 		<!-- <uni-list-item link title="发起会话" ></uni-list-item> -->
-		<view v-if="$store.state.isLogin">
-			<uni-list-item link title="发起群聊" @click="showAddGroup=true"></uni-list-item>
-			<uni-list-item link title="加入群聊" @click="openDialog('addGroup')"></uni-list-item>
-			<uni-list-item link title="添加好友" @click="openDialog('addFriend')"></uni-list-item>			
-		</view>
+		<uni-list-item link title="发起群聊" :to="`../../pages/components/newGroup/newGroup`"></uni-list-item>
+		<uni-list-item link title="加入群聊" @click="openDialog('addGroup')"></uni-list-item>
+		<uni-list-item link title="添加好友" @click="openDialog('addFriend')"></uni-list-item>
 
 		
 		<uni-list :border="false" v-for="n in userRelation" style="margin-top: 30rpx;">
@@ -48,13 +39,13 @@
 	export default {
 		data() {
 			return {
-				userRelation:[
-					// {
-					// 	userID:'',
-					// 	userAvatar:'',
-					// 	userNick:''
-					// }
-				],
+				// userRelation:[
+				// 	{
+				// 		userID:'',
+				// 		userAvatar:'',
+				// 		userNick:''
+				// 	}
+				// ],
 				showAddGroup:false,
 				addUserID:'',
 				addGroupID:'',
@@ -71,20 +62,30 @@
 		computed:{
 			getUserProfile(){
 				return this.$store.state.userProfile
+			},
+			islogin(){
+				return this.$store.state.isLogin
+			},
+			userRelation(){
+				return this.$store.state.userRelation
 			}
 		},
 		onShow() {
-			if (!this.$store.state.isLogin){
+			if (!this.islogin){
 				uni.showModal({
 					title: '请登录',
 					// content: "",
-					showCancel:false
+					showCancel:false,
+					success: function (res) {
+						if (res.confirm) {
+							uni.switchTab({
+									url: '/pages/setting/index'
+							});
+						}
+					}
 				})
-				this.userRelation= []
-			}else{
-				this.getUserRelation()
 			}
-
+			this.getUserRelation()
 		},
 		methods: {
 			deleteFriend: function (e, id) {
@@ -115,12 +116,10 @@
 					});
 				} 
 			},
+			
+			// 获取好友
 			getUserRelation(){
-				this.Request.GetUserRelation(this.getUserProfile.userID)
-				.then((res)=>{
-					// console.log(res.data.data.UserProfileItem)
-					this.transUserRelation(res.data.data.UserProfileItem)
-				})
+				this.$store.commit('getUserRelation',true)	
 			},
 			
 			// 处理返回的用户信息
@@ -247,28 +246,7 @@
 				  console.warn('joinGroup error:', imError); // 申请加群失败的相关信息
 				});
 			},
-			
-			// 创建群
-			createNewGroup(){
-				console.log("创建群聊")
-				// // 创建好友工作群
-				// let promise = tim.createGroup({
-				//   type: TIM.TYPES.GRP_WORK,
-				//   name: 'WebSDK',
-				//   memberList: [{
-				//     userID: 'user1',
-				//     // 群成员维度的自定义字段，默认情况是没有的，需要开通，详情请参阅自定义字段
-				//     memberCustomField: [{key: 'group_member_test', value: 'test'}]
-				//   }, {
-				//     userID: 'user2'
-				//   }] // 如果填写了 memberList，则必须填写 userID
-				// });
-				// promise.then(function(imResponse) { // 创建成功
-				//   console.log(imResponse.data.group); // 创建的群的资料
-				// }).catch(function(imError) {
-				//   console.warn('createGroup error:', imError); // 创建群组失败的相关信息
-				// });
-			}
+
 		}
 	}
 </script>

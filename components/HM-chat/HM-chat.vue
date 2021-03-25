@@ -256,6 +256,15 @@
 		},
 		onNavigationBarButtonTap(e) {
 			console.log(e)
+			if(this.dialogData.type == 'GROUP'){
+				uni.navigateTo({
+					url:`../../pages/components/groupInfo/groupInfo?groupID=${this.dialogData.to}`
+				})
+			}else{
+				uni.navigateTo({
+					url:`../../pages/components/userInfo/userInfo?userID=${this.dialogData.to}`
+				})
+			}
 		},
 		// 收到新信息触发
 		computed: {
@@ -316,12 +325,6 @@
 			});
 		},
 		methods:{
-			back: function () {
-				console.log("??")
-				uni.navigateBack({
-				    delta: 1
-				});
-			},
 			// 接受消息(筛选处理)
 			screenMsg(msg){
 				//从长连接处转发给这个方法，进行筛选处理
