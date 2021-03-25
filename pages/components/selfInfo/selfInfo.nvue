@@ -1,0 +1,186 @@
+<template>
+	<view>
+		<u-modal v-model="changeEmailModel" :show-cancel-button="true" @confirm="changeEmail()" title="修改邮箱" :title-style="{color: 'red'}">
+			<view style=" padding: 35rpx;">
+				<u-form label-width="100rpx">
+					<u-form-item label="新邮箱"><u-input v-model="nemail" :disabled="token !== ''" placeholder="新邮箱" /></u-form-item>
+					<u-form-item label="验证码">
+						<u-input v-model="code" placeholder="验证码" maxlength="6" />
+						<text slot="right" style="color: #007AFF;" @click="getMailCode()">获取</text>
+					</u-form-item>
+				</u-form>		
+			</view>
+		</u-modal>
+		
+		<u-modal v-model="changePasswdModel" :show-cancel-button="true" title="修改密码" @confirm="changePW()" :title-style="{color: 'red'}">
+			<view style=" padding: 35rpx;">
+				<u-form label-width="100rpx">
+					<u-form-item label="原密码"><u-input v-model="pw" type="password" placeholder="原密码" /></u-form-item>
+					<u-form-item label="新密码"><u-input v-model="npw" type="password" placeholder="新密码" /></u-form-item>
+					<u-form-item label="确认"><u-input v-model="rnpw" type="password" placeholder="确认密码" /></u-form-item>
+				</u-form>		
+			</view>
+		</u-modal>
+		
+		<uni-list-item title="TID" :rightText="tid"></uni-list-item>
+		<uni-list-item title="邮箱" :rightText="email"></uni-list-item>
+		
+		<view style="height: 50rpx;background-color:#F3F4F6;"></view>
+		<uni-list-item @click="" link>
+			<text slot="body" class="slot-box slot-text">修改头像</text>
+			<image class="slot-image" src="/static/logo.png" mode="widthFix"></image>
+		</uni-list-item>
+		<uni-list-item @click="changePasswdModel=true" link>
+			<text slot="body" class="slot-box slot-text">修改密码</text>
+		</uni-list-item>
+		<uni-list-item @click="changeEmailModel=true" link>
+			<text slot="body" class="slot-box slot-text">修改邮箱</text>
+		</uni-list-item>			
+
+	</view>
+</template>
+
+<script>
+	export default {
+		data() {
+			return {
+				changeEmailModel:false,
+				changePasswdModel:false,
+				
+				tid:'',
+				email:'',
+				
+				nemail:'',
+				token:'',
+				code:'',
+				
+				pw:'',
+				npw:'',
+				rnpw:''
+				
+			}
+		},
+		onLoad() {
+			this.Request.GetUserData(this.$store.state.userProfile.userID)
+			.then(res=>{
+				if(res.data.code == 200){
+					this.tid = res.data.data.userTimId
+					this.email = res.data.data.email
+				}
+			})
+		},
+		methods: {
+			getMailCode: function () {
+				if(this.$u.test.email(this.nemail)){
+					this.Request.GetMailCode({email:this.nemail})
+					.then(result=>{
+							if(result.data.code==200){
+									this.token=result.data.message
+									uni.showToast({
+										title:"已发送至邮箱，请注意查收(10分钟有效)",
+										icon:"none",
+										duration:1000
+									})
+							}else if(result.data.code==302){						
+									uni.showToast({
+										title:"邮箱已被注册，请更换！",
+										icon:"none",
+										duration:1000
+									})
+									this.resignData.token=''
+							}else{
+									uni.showToast({
+										title:"服务器错误！",
+										icon:"none",
+										duration:1000
+									})
+							}
+					})
+				}else{
+					uni.showToast({
+						title:"请检查邮箱",
+						icon:"none",
+						duration:1000
+					})
+				}
+			},
+			changePW(){
+				if(this.pw == '' || this.npw == '' || this.rnpw == ''){
+					uni.showToast({
+						title:'检查输入',
+						icon:"none",
+						duration:1000
+					})
+				}else if(this.npw !== this.rnpw){
+					uni.showToast({
+						title:"两次密码不一致",
+						icon:"none",
+						duration:1000
+					})
+				}else{
+					this.Request.UpdatePassWd({
+						userId:this.$store.state.userProfile.userID,
+						pw:this.pw,
+						npw:this.npw
+					})
+					.then(res=>{
+						if(res.data.code == 200){
+							uni.showToast({
+								title: '更改成功',
+								icon:'success',
+								duration:1000
+							});
+							this.pw = ''
+							this.npw = ''
+							this.rnpw = ''
+						}else{
+							uni.showToast({
+								title: '失败',
+								icon:'none',
+								duration:1000
+							});
+						}
+					})
+				}
+			},
+			changeEmail(){
+				if(this.code == ''){
+					uni.showToast({
+						title:'请输入验证码',
+						icon:"none",
+						duration:1000
+					})
+				}else{
+					this.Request.UpdateEmail(
+						{
+							userId:this.$store.state.userProfile.userID,
+							token:this.token,
+							email:this.nemail,
+							code:this.code,
+						}
+					)
+					.then(res=>{
+						console.log(res)
+						if(res.data.code == 200) {
+							uni.showToast({
+								title: '成功',
+								icon:'success',
+								duration:1000
+							});
+							this.email = this.nemail
+						}else{
+							uni.showToast({
+								title: '失败',
+								duration:1000
+							});
+						}
+					})
+				}
+			}
+		}
+	}
+</script>
+
+<style>
+
+</style>

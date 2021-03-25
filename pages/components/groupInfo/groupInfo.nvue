@@ -23,7 +23,6 @@
 			<uni-list-item @click="GroupOption('dismissGroup')" link v-if="userID === groupOwner">
 				<text slot="body" class="slot-box slot-text">解散群聊</text>
 			</uni-list-item>
-			
 		</uni-group>
 	</view>
 </template>

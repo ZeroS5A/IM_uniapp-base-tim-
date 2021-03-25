@@ -7,21 +7,21 @@
 					<u-form-item label="邮箱" right="sdf"><u-input :disabled="isGetMialCode" v-model="resignData.mail" placeholder="" /></u-form-item>
 					
 					<view v-if="isGetMialCode">
-						<u-form-item label="验证码"><u-input v-model="resignData.mailCode" placeholder="" /></u-form-item>
-						<u-form-item label="用户名"><u-input  v-model="resignData.userID" placeholder="" /></u-form-item>
+						<u-form-item label="验证码"><u-input v-model="resignData.mailCode" placeholder="邮箱验证码" maxlength=6 /></u-form-item>
+						<u-form-item label="用户名"><u-input  v-model="resignData.userID" placeholder="唯一ID" /></u-form-item>
 						<u-form-item label="密码">
 							<u-input
-								
+								:password-icon="false"
 								v-model="resignData.userPW" 
-								placeholder="" 
+								placeholder="设置密码" 
 								type='password'
 							/>
 						</u-form-item>
 						<u-form-item label="确认">
 							<u-input 
-								
+								:password-icon="false"
 								v-model="resignData.reUserPW" 
-								placeholder="" 
+								placeholder="确认密码" 
 								type='password'
 							/>
 						</u-form-item>						
@@ -74,7 +74,7 @@
 			}
 		},
 		onLoad() {
-		
+			
 		},
 		methods: {
 			getMailCode: function () {

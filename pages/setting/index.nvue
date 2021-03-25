@@ -88,6 +88,9 @@
 			},
 			showUserProfile: function () {
 				console.log(this.$store.state.userProfile)
+				uni.navigateTo({
+					url:'../components/selfInfo/selfInfo'
+				})
 			},
 			getStorage: function (key) {
 				if (key.length === 0) {

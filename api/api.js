@@ -51,6 +51,9 @@ export default {
 	GetUserRelation(userID){
 		return instance.post(`/user/getUserRelation?userID=${userID}`)
 	},
+	GetUserData(userID){
+		return instance.post(`/user/getUserData?userID=${userID}`)
+	},
 	AddUserRelation(postData){
 		return instance.post("/user/addUserRelation",postData)
 	},
@@ -59,6 +62,12 @@ export default {
 	},
 	GetMailCode(data){
 		return instance.post("/user/getMailCode",data)
+	},
+	UpdateEmail(data){
+		return instance.post("/user/updateEmail",data)
+	},
+	UpdatePassWd(data){
+		return instance.post("/user/updatePassWd",data)
 	},
 	UserRegister(data){
 		return instance.post("/user/userRegister",data)
