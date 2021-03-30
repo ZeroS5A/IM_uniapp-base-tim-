@@ -9,7 +9,7 @@
 						<uni-list-chat
 							:title="getDialogName(dialog)"
 							link="true"
-							:avatar="getDialogAvatar(dialog)?getDialogAvatar(dialog):'https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png'"
+							:avatar="getDialogAvatar(dialog)"
 							:note="`${dialog.lastMessage.messageForShow}`" :time="dateUtils.formatTimestamp(dialog.lastMessage.lastTime)"
 							badge-positon="left"
 							:badge-text="dialog.unreadCount"
@@ -122,7 +122,8 @@
 			},
 			getDialogName: function (dialog) {
 				if (dialog.type ==='C2C'){
-					return dialog.userProfile.nick?dialog.userProfile.nick:dialog.userProfile.userID
+					// return dialog.userProfile.nick?dialog.userProfile.nick:dialog.userProfile.userID
+					return dialog.userProfile.userID
 				}
 				else if (dialog.type === 'GROUP') {
 					return `群组-${dialog.groupProfile.name?dialog.groupProfile.name:dialog.groupProfile.groupID}`
@@ -136,13 +137,13 @@
 			},
 			getDialogAvatar: function (dialog) {
 				if (dialog.type ==='C2C'){
-					return dialog.userProfile.avatar
+					return dialog.userProfile.avatar?dialog.userProfile.avatar:'/static/user.png'
 				}
 				else if (dialog.type === 'GROUP') {
-					return dialog.groupProfile.avatar
+					return dialog.groupProfile.avatar?dialog.groupProfile.avatar:'/static/group.png'
 				}
 				else if (dialog.type === "@TIM#SYSTEM") {
-					return "系统通知"
+					return "/static/systemMsg.png"
 				}
 				else {
 					return "未知"

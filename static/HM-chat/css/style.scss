@@ -110,7 +110,7 @@ page{
 	}
 }
 .input-box{
-	width: 98%;
+	width: 100%;
 	min-height: 100upx;
 	padding: 0 1%;
 	background-color: #f2f2f2;
@@ -146,7 +146,8 @@ page{
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			background:linear-gradient(to right,#f09b37,#eb632c);
+			// background:linear-gradient(to right,#f09b37,#eb632c);
+			background:linear-gradient(to right,#1296db,#1296db);
 			color: #fff;
 			border-radius: 6upx;
 			font-size: 24upx;

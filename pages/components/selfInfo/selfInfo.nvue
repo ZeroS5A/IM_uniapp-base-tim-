@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<u-modal v-model="changeEmailModel" :show-cancel-button="true" @confirm="changeEmail()" title="修改邮箱" :title-style="{color: 'red'}">
+		<u-modal v-model="changeEmailModel" :show-cancel-button="true" @cancel="clearEmail()" @confirm="changeEmail()" title="修改邮箱" :title-style="{color: 'red'}">
 			<view style=" padding: 35rpx;">
 				<u-form label-width="100rpx">
 					<u-form-item label="新邮箱"><u-input v-model="nemail" :disabled="token !== ''" placeholder="新邮箱" /></u-form-item>
@@ -22,20 +22,26 @@
 			</view>
 		</u-modal>
 		
-		<uni-list-item title="TID" :rightText="tid"></uni-list-item>
-		<uni-list-item title="邮箱" :rightText="email"></uni-list-item>
+		<uni-list-item title="TID" :rightText="userData.userTimId"></uni-list-item>
+		<uni-list-item title="邮箱" :rightText="userData.email"></uni-list-item>
 		
 		<view style="height: 50rpx;background-color:#F3F4F6;"></view>
-		<uni-list-item @click="" link>
+		
+		<uni-list-item @click="changeAvatar" link>
 			<text slot="body" class="slot-box slot-text">修改头像</text>
-			<image class="slot-image" src="/static/logo.png" mode="widthFix"></image>
+			<template slot="footer">
+				<image class="slot-image" :src="userData.avatarUrl" mode="widthFix"></image>
+			</template>
 		</uni-list-item>
+		
 		<uni-list-item @click="changePasswdModel=true" link>
 			<text slot="body" class="slot-box slot-text">修改密码</text>
 		</uni-list-item>
+		
 		<uni-list-item @click="changeEmailModel=true" link>
 			<text slot="body" class="slot-box slot-text">修改邮箱</text>
-		</uni-list-item>			
+		</uni-list-item>	
+
 
 	</view>
 </template>
@@ -46,10 +52,7 @@
 			return {
 				changeEmailModel:false,
 				changePasswdModel:false,
-				
-				tid:'',
-				email:'',
-				
+											
 				nemail:'',
 				token:'',
 				code:'',
@@ -61,15 +64,58 @@
 			}
 		},
 		onLoad() {
-			this.Request.GetUserData(this.$store.state.userProfile.userID)
-			.then(res=>{
-				if(res.data.code == 200){
-					this.tid = res.data.data.userTimId
-					this.email = res.data.data.email
-				}
-			})
+		},
+		computed: {
+			userData(){
+				return this.$store.state.userData
+			}
 		},
 		methods: {
+			changeAvatar: function () {
+				uni.chooseImage({
+				    count: 6, //默认9
+				    sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
+				    sourceType: ['album'], //从相册选择
+				    success: (res) => {
+							this.updataAvatar(res.tempFiles[0])
+				    }
+				});
+			},
+			updataAvatar: function(img){
+				console.log(this.userData.userName);
+				var formdata = new FormData();
+				formdata.append('userID', this.userData.userName);
+				formdata.append('image', img);
+				formdata.append('type', 'updateAvatar');
+				
+				this.Request.UploadImage(formdata)
+				.then(result=>{
+						if(result.data.code==200){
+								//获取md对象返回上传的url
+								console.log("头像连接",result.data)
+								this.avatarURL = result.data.data.imgUrl
+								
+								// 更新tim端头像
+								let promise = this.Tim.updateMyProfile({
+								  avatar: this.avatarURL,
+								});
+								promise.then((imResponse) => {
+								  console.log(imResponse.data); // 更新资料成功
+									uni.showToast({
+										title:'更新成功',
+										icon:"success",
+										duration:1000
+									})
+									// 更新store
+									this.$store.commit("updateUserData")
+								}).catch(function(imError) {
+								  console.warn('updateMyProfile error:', imError); // 更新资料失败的相关信息
+								});
+						}else{
+								console.log("error")
+						}
+				})
+			},
 			getMailCode: function () {
 				if(this.$u.test.email(this.nemail)){
 					this.Request.GetMailCode({email:this.nemail})
@@ -104,7 +150,7 @@
 					})
 				}
 			},
-			changePW(){
+			changePW: function(){
 				if(this.pw == '' || this.npw == '' || this.rnpw == ''){
 					uni.showToast({
 						title:'检查输入',
@@ -143,7 +189,12 @@
 					})
 				}
 			},
-			changeEmail(){
+			clearEmail: function(){
+				this.token='',
+				this.code='',
+				this.nemail=''
+			},
+			changeEmail: function(){
 				if(this.code == ''){
 					uni.showToast({
 						title:'请输入验证码',
@@ -182,5 +233,25 @@
 </script>
 
 <style>
-
+	.slot-box {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		/* #endif */
+		flex-direction: row;
+		align-items: center;
+	}
+	.slot-text {
+		flex: 1;
+		font-size: 14px;
+		/* color: #4cd964; */
+		margin-right: 10px;
+	}
+	.slot-image {
+		/* #ifndef APP-NVUE */
+		display: block;
+		/* #endif */
+		margin-right: 10px;
+		width: 30px;
+		height: 30px;
+	}
 </style>

@@ -2,7 +2,7 @@
 	<view>
 		<u-form style="margin-left: 20rpx;">
 			<u-form-item label="群ID"><u-input v-model="groupID" placeholder="唯一ID,不可修改" /></u-form-item>
-			<u-form-item label="群名"><u-input v-model="groupName" placeholder="可修改"  /></u-form-item>
+			<u-form-item label="群名"><u-input v-model="groupName" placeholder="创建后不可修改"  /></u-form-item>
 		</u-form>
 		<u-divider style="margin-top: 30rpx;">选择成员</u-divider>
 		<uni-list :border="false" style="margin-top: 30rpx;">
@@ -44,9 +44,9 @@
 			},
 			// 创建群
 			createNewGroup(){
-				if (this.groupID == '' || this.groupName == ''){
+				if (this.groupName == '' || this.groupID == ''){
 					uni.showModal({
-						title: '检查输入',
+						title: '请检查输入',
 						// content: "",
 						showCancel:false
 					})

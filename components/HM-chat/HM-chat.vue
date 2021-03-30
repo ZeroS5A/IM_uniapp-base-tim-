@@ -443,7 +443,7 @@
 			// 处理接受的信息
 			transMsg(msg) {
 				if (msg.type == "TIMTextElem"){
-					return({type:"user",msg:{id:msg.ID,type:"text",time:dateUtils.formatTimestamp(msg.time),userinfo:{uid:msg.flow=='in'?1:0,username:msg.from,face:msg.avatar},content:msg.payload}})
+					return({type:"user",msg:{id:msg.ID,type:"text",time:dateUtils.formatTimestamp(msg.time),userinfo:{uid:msg.flow=='in'?1:0,username:msg.from,face:msg.avatar?msg.avatar:'/static/user.png'},content:msg.payload}})
 				}
 				else if (msg.type == "TIMCustomElem"){
 					return({type:"system",msg:{id:msg.ID,type:"text",content:{text:msg.payload.extension}}})
@@ -751,9 +751,9 @@
 			sendMsg(content,type){
 				//实际应用中，此处应该提交长连接，模板仅做本地处理。
 				var nowDate = new Date();
-				let lastid = this.msgList[this.msgList.length-1].msg.id || 0;
+				let lastid = this.msgList[this.msgList.length-1].msg.id?this.msgList[this.msgList.length-1].msg.id:0;
 				lastid++;
-				let msg = {type:'user',msg:{id:lastid,time:nowDate.getHours()+":"+nowDate.getMinutes(),type:type,userinfo:{uid:0,username:this.userinfo.nick,face:this.userinfo.avatar},content:content}}
+				let msg = {type:'user',msg:{id:lastid,time:nowDate.getHours()+":"+nowDate.getMinutes(),type:type,userinfo:{uid:0,username:this.userinfo.nick,face:this.userinfo.avatar || '/static/user.png'},content:content}}
 				// 发送消息
 				this.screenMsg(msg);
 				// // 定时器模拟对方回复,三秒

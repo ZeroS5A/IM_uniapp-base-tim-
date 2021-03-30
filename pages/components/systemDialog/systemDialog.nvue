@@ -21,7 +21,7 @@
 			</view>
 			<view class="row" v-for="(row,index) in msgList" :key="index" :id="'msg'+row.msg.id">
 				<!-- 加群请求 -->
-				<u-card v-if="row.type == 'GroupJoinApply'" title="群系统通知" :sub-title="dateUtils.formatTimestamp(row.time)">
+				<!--<u-card v-if="row.type == 'GroupJoinApply'" title="群系统通知" :sub-title="dateUtils.formatTimestamp(row.time)">
 					<view class="" slot="body">
 						<u-row>
 							<u-col span="8">{{row.msg.payload.operatorID}} 申请加入群 {{row.msg.payload.groupProfile.name}}</u-col>
@@ -30,18 +30,30 @@
 							</u-col>
 						</u-row>
 					</view>
-					<!-- <view class="" slot="foot"><u-icon name="chat-fill" size="34" color="" label="30评论"></u-icon></view> -->
-				</u-card>
+					 <view class="" slot="foot"><u-icon name="chat-fill" size="34" color="" label="30评论"></u-icon></view> 
+				</u-card>-->
 				
-				<!-- 群信息 -->
+				<uni-card v-if="row.type == 'GroupJoinApply'" title="群管理信息" :extra="dateUtils.formatTimestamp(row.time)" isShadow >
+						<u-row>
+							<u-col span="8">{{row.msg.payload.operatorID}} 申请加入群 {{row.msg.payload.groupProfile.name}}</u-col>
+							<u-col span="4">
+								<u-button type="primary" size="medium" @click="openModel('showJoinGroup',row.msg)">操作</u-button>
+							</u-col>
+						</u-row>
+				</uni-card>
+				
+				<!-- 群信息 
 				<u-card v-if="row.type == 'GroupMessage'" title="群系统通知" :sub-title="dateUtils.formatTimestamp(row.time)">
 					<view class="" slot="body">
 						<u-row>
 							<u-col span="12">{{row.msg}}</u-col>
 						</u-row>
 					</view>
-					<!-- <view class="" slot="foot"><u-icon name="chat-fill" size="34" color="" label="30评论"></u-icon></view> -->
-				</u-card>
+					<view class="" slot="foot"><u-icon name="chat-fill" size="34" color="" label="30评论"></u-icon></view>
+				</u-card>-->
+				<uni-card v-if="row.type == 'GroupMessage'" title="群系统通知" :extra="dateUtils.formatTimestamp(row.time)" isShadow >
+					<text class="content-box-text" style="text-align: center;">{{row.msg}}</text>
+				</uni-card>
 				
 				<!-- 其他信息 -->
 				<u-card v-if="row.type == 'OterMessage'" title="未处理" :sub-title="dateUtils.formatTimestamp(row.time)">

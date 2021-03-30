@@ -1,7 +1,7 @@
 <template>
 	<view>
 		<view class="example-body">
-			<uni-card
+			<!-- <uni-card
 				v-for="n in 15" 
 				:isShadow="false" 
 				:isFull="true"
@@ -24,7 +24,16 @@
 						<view @click.stop="footerClick('分享')"><text class="footer-box__item">分享</text></view>-
 					</view>
 				</template>
-			</uni-card>
+			</uni-card> -->
+			<view class="example-body" v-for="n in 15" style="margin-top: 10rpx;" >
+				<view class="example-box">
+					<uni-card title="标题文字" :isFull="true" isShadow='true' note="额外信息" extra="额外信息" @click="clickCard">
+						<text class="content-box-text">
+							testtest
+						</text>
+					</uni-card>
+				</view>
+			</view>
 		</view>
 	</view>
 </template>

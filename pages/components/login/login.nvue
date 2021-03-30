@@ -48,8 +48,8 @@
 			return {
 				title: 'Hello',
 				loginData: {
-					userID:'ZeroS',
-					userPW:123456
+					userID:'',
+					userPW:''
 				}
 			}
 		},
@@ -66,10 +66,19 @@
 				this.Request.UserLogin(this.loginData)
 				.then((res)=>{
 					console.log(res)
-					if (res.data.code === 200)
-					this.timLogin(res.data.data.timId,res.data.data.userSig)
-					else
-					console.log("error")
+					if (res.data.code === 200) {
+						this.timLogin(res.data.data.userTimId,res.data.data.userSig)
+						console.log(res.data.data)
+						this.$store.commit('setUserData',res.data.data)
+					}
+					else if (res.data.code === 4105){
+						uni.showToast({
+							title:'请检查用户名和密码！',
+							duration:2000,
+							icon:'none'
+						})
+					}
+
 				})
 
 			},

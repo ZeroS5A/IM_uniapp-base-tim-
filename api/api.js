@@ -3,8 +3,8 @@ import axios from 'axios';
 // import router from '../router'
 
 const instance = axios.create({
-  // baseURL: 'https://lczeros.cn/MyBlog',
-  baseURL: 'http://192.168.31.181:8085/IM',
+  baseURL: 'http://im.lczeros.cn/IM',
+  // baseURL: 'http://192.168.31.181:8085/IM',
   timeout: 10000,
   headers: {
     'Content-Type': "application/json;charset=UTF-8",
@@ -24,26 +24,27 @@ const instance = axios.create({
 //     return Promise.reject(error)
 //   }
 // )
-// // 响应拦截器
-// instance.interceptors.response.use(
-//   response => {
-//     //拦截失效token
-//     if(response.data.code == 4107){
-//       router.push("/login")
-//       // 清除过期信息
-//       localStorage.removeItem("token")
-//       localStorage.removeItem("UserData")
-//       Message.info('登录已过期,请重新登陆');
-//       // 使用windows跳转无法保存状态
-//       // window.location.href='/login?type=4107'
-//     }
-//     return response
-//   },
-//   error => {
-//     console.log(error)
-//     return Promise.reject(error)
-//   }
-// )
+// 响应拦截器
+instance.interceptors.response.use(
+  response => {
+    //拦截失效token
+    // if(response.data.code == 4107){
+    //   router.push("/login")
+    //   // 清除过期信息
+    //   localStorage.removeItem("token")
+    //   localStorage.removeItem("UserData")
+    //   Message.info('登录已过期,请重新登陆');
+    //   // 使用windows跳转无法保存状态
+    //   // window.location.href='/login?type=4107'
+    // }
+    return response
+  },
+  error => {
+    console.log(error)
+		alert("网络错挖")
+    return Promise.reject(error)
+  }
+)
 export default {
   UserLogin(data){
     return instance.post("/user/userLogin",data)
@@ -71,6 +72,10 @@ export default {
 	},
 	UserRegister(data){
 		return instance.post("/user/userRegister",data)
+	},
+	//上传接口
+	UploadImage(data){
+		return instance.post("/upload/image",data)
 	},
 	Test(){
 	  return instance.post("/hello")

@@ -24,7 +24,7 @@
 				showArrow="false"
 			>
 				<view slot="header" class="slot-box">
-					<image class="slot-image" :src="getUserProfile.avatar?getUserProfile.avatar:'/static/logo.png'" mode="widthFix"></image>
+					<image class="slot-image" :src="getUserProfile.avatar?getUserProfile.avatar:'/static/user.png'" mode="widthFix"></image>
 				</view>
 				<text slot="body" class="slot-box slot-text">{{getUserProfile.nick?getUserProfile.nick:getUserProfile.userID}}</text>
 			</uni-list-item>

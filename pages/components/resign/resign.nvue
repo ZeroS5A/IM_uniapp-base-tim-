@@ -4,7 +4,7 @@
 			<view class="demo-layout bg-purple-light">
 				
 				<u-form :model="resignData" ref="uForm" label-width='100rpx'>
-					<u-form-item label="邮箱" right="sdf"><u-input :disabled="isGetMialCode" v-model="resignData.mail" placeholder="" /></u-form-item>
+					<u-form-item label="邮箱"><u-input :disabled="isGetMialCode" v-model="resignData.email" placeholder="" /></u-form-item>
 					
 					<view v-if="isGetMialCode">
 						<u-form-item label="验证码"><u-input v-model="resignData.mailCode" placeholder="邮箱验证码" maxlength=6 /></u-form-item>
@@ -61,13 +61,12 @@
 	export default {
 		data() {
 			return {
-				title: 'Hello',
 				isGetMialCode: false,
 				resignData: {
-					userID:'ZeroS',
-					userPW:'123456',
+					userID:'',
+					userPW:'',
 					reUserPW:'',
-					mail:'123@213.com',
+					email:'',
 					mailCode:'',
 					token:''
 				}
@@ -78,7 +77,7 @@
 		},
 		methods: {
 			getMailCode: function () {
-				if(this.$u.test.email(this.resignData.mail)){
+				if(this.$u.test.email(this.resignData.email)){
 					this.Request.GetMailCode({email:this.resignData.email})
 					.then(result=>{
 							if(result.data.code==200){
@@ -122,7 +121,7 @@
 				else{
 					this.Request.UserRegister(
 						{
-							email:this.resignData.mail,
+							email:this.resignData.email,
 							token:this.resignData.token,
 							code:this.resignData.mailCode,
 							userName:this.resignData.userID,

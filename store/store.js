@@ -13,6 +13,14 @@ const store = new Vuex.Store({
 			name:'helloVueX',
 			isLogin: false,
 			newMessage: [],
+			userData:{
+				userTimId:'',
+				userName:'',
+				userNickName:'',
+				avatarUrl:'',
+				email:'',
+				role:''
+			},
 			userProfile: {
 				userID:'',
 				adminForbidType: "",
@@ -40,6 +48,25 @@ const store = new Vuex.Store({
 			setNewMessage(state, newMessage){
 				state.newMessage = newMessage
 			},
+			// 获取用户信息（后台）
+			setUserData(state, data){
+				state.userData = data
+			},
+			// 更新用户信息（后台）
+			updateUserData(state){
+				Request.GetUserData(state.userProfile.userID)
+				.then(res=>{
+					if(res.data.code == 200){
+						state.userData = {
+							...state.userData,
+							userTimId: res.data.data.userTimId,
+							email: res.data.data.email,
+							avatarUrl: res.data.data.avatarUrl
+						}
+					}
+				})
+			},
+			// 获取用户信息（tim端）
 			setUserProfile(state, profile){
 				state.userProfile = profile
 			},

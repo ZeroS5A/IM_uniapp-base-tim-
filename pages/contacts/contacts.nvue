@@ -24,9 +24,9 @@
 						:to="`../../components/HM-chat/HM-chat?conversationID=C2C${n.userID}&type=C2C&to=${n.userID}&toName=${n.userID}`"
 					>
 						<view slot="header" class="slot-box">
-							<image class="slot-image" :src="n.userAvatar?n.userAvatar:'/static/logo.png'" mode="widthFix"></image>
+							<image class="slot-image" :src="n.userAvatar?n.userAvatar:'/static/user.png'" mode="widthFix"></image>
 						</view>
-						<text slot="body" class="slot-box slot-text">{{n.userNick?n.userNick:n.userID}}</text>
+						<text slot="body" class="slot-box slot-text">{{n.userID}}</text>
 					</uni-list-item>
 				</uni-swipe-action-item>
 			</uni-swipe-action>
