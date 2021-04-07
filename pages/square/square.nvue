@@ -1,39 +1,49 @@
 <template>
 	<view>
+		<uni-popup id="addComment" ref="addComment" type="dialog">
+			<uni-popup-dialog mode="input" title="添加评论" :value="addComment" placeholder="请输入..." @confirm="handleComment"></uni-popup-dialog>
+		</uni-popup>
+		
+		<uni-fab
+				:pattern="pattern"
+				:content="content"
+				horizontal="right"
+				vertical="bottom"
+				direction="horizontal"
+				@trigger="trigger"
+		></uni-fab>
+		
 		<view class="example-body">
-			<!-- <uni-card
-				v-for="n in 15" 
-				:isShadow="false" 
-				:isFull="true"
-				:title="isLogin?'yes':'noe'" 
-				subTitle="副标题" 
-				mode="title" 
-				thumbnail="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-dc-site/460d46d0-4fcc-11eb-8ff1-d5dcf8779628.png" 
-				extra="技术有上限" 
-				note="true" 
-				@click="clickCard"
-				style="margin-bottom:15px;"
-			>
+			<uni-card v-for="n in 6" :isShadow="true" title="ZeroS" mode="title" thumbnail="https://lczeros.cn/blogData/images/b2ac992080e7ad69a4797ef82ccfc87a.jpeg" extra="10:22" note="true" @click="clickCard">
 				<view>
-					随便什么内容啦啊
+					<view class="content-box" style="margin-bottom: 20rpx;">
+						<text class="content-box-text">测试一下图片的排布</text>
+					</view>
+					<view class="image-box">
+						<u-row>
+							<u-image style="margin-top: 10rpx;" src="https://lczeros.cn/blogData/images/212954fb6ab49561b046d3c5bf16799d.png" mode="widthFix"></u-image>
+							<u-col span="4" v-for="n in 6">
+								<u-image height="190rpx" style="margin-top: 20rpx;" src="https://lczeros.cn/blogData/images/b2ac992080e7ad69a4797ef82ccfc87a.jpeg" mode="aspectFit"></u-image>
+							</u-col>
+						</u-row>
+					</view>
 				</view>
 				<template slot="footer">
 					<view class="footer-box">
-						<view @click.stop="footerClick('喜欢')"><text class="footer-box__item">喜欢</text></view>-
-						<view @click.stop="footerClick('评论')"><text class="footer-box__item">评论</text></view>-
-						<view @click.stop="footerClick('分享')"><text class="footer-box__item">分享</text></view>-
+						<view @click.stop="footerClick('喜欢')"><text class="footer-box__item">点赞</text></view>
+						<view @click.stop="$refs.addComment.open()"><text class="footer-box__item">评论</text></view>
+						<view @click.stop="footerClick('分享')"><text class="footer-box__item">删除</text></view>
+					</view>
+					<view style="margin-top: 20rpx;width: 100%;background-color:#F5F5F5;">
+						<view v-for="n in 6">
+							<p style="word-break:break-all;">
+								<span style="color: #007AFF;" >ZeroS：</span>
+									sdfasad
+							</p>
+						</view>
 					</view>
 				</template>
-			</uni-card> -->
-			<view class="example-body" v-for="n in 15" style="margin-top: 10rpx;" >
-				<view class="example-box">
-					<uni-card title="标题文字" :isFull="true" isShadow='true' note="额外信息" extra="额外信息" @click="clickCard">
-						<text class="content-box-text">
-							testtest
-						</text>
-					</uni-card>
-				</view>
-			</view>
+			</uni-card>
 		</view>
 	</view>
 </template>
@@ -42,11 +52,33 @@
 	export default {
 		data() {
 			return {
+				pattern: {
+					color: '#7A7E83',
+					backgroundColor: '#fff',
+					selectedColor: '#007AFF',
+				},
+				content: [{
+						iconPath: '/static/component.png',
+						selectedIconPath: '/static/componentHL.png',
+						text: '我的',
+						active: false
+					},
+					{
+						iconPath: '/static/api.png',
+						selectedIconPath: '/static/apiHL.png',
+						text: '发布',
+						active: false
+					},
+				],
 				
+				addComment:''
 			}
 		},
 		methods: {
-			
+			handleComment:function(){
+				console.log(this.addComment)
+				this.$refs.addComment.close()
+			}
 		},
 		computed: {
 			isLogin(){
@@ -64,11 +96,21 @@
 </script>
 
 <style>
+
+	.image-box {
+		/* #ifndef APP-NVUE */
+		display: flex;
+		flex-direction: column;
+		/* #endif */
+		height: auto;
+		overflow: hidden;
+	}
+	
 	.footer-box {
 		/* #ifndef APP-NVUE */
 		display: flex;
 		/* #endif */
-		justify-content: flex-end;
+		justify-content: space-between;
 		flex-direction: row;
 	}
 

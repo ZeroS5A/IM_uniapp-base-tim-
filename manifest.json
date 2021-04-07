@@ -70,6 +70,10 @@
     },
     "h5" : {
         "title" : "Zim",
-        "domain" : "im.lczeros.cn"
+        /* "domain" : "im.lczeros.cn"*/
+				
+				"devServer": {
+				     "disableHostCheck": true
+				}
     }
 }
