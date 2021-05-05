@@ -1,0 +1,67 @@
+<template>
+	<view>
+		<view class="uni-textarea">
+			<view class="uni-textarea" style="margin: 20px;">
+					<textarea placeholder-style="color:#e4e4e4" v-model="blogContent" placeholder="输入些什么吧"/>
+			</view>
+		</view>
+		<image-drag-sort :list="images"></image-drag-sort>
+		<u-button style="margin: 10px;" type="primary" @click="handleBlog">OK 发布</u-button>
+	</view>
+</template>
+
+<script>
+	import imageDragSort from "@/components/image-drag-sort/index.vue"
+	export default {
+		data() {
+			return {
+				blogContent:'',
+				images:[]
+			}
+		},
+		methods: {
+			handleBlog(){
+				if (this.blogContent.length === 0 && this.images.length === 0 ){
+					uni.showToast({
+						icon:'none',
+						title:"请输入些什么吧"
+					})
+					return
+				}
+				let postData = {
+					userName: this.userData.userName,
+					classId: 1,
+					title: '',
+					content: this.blogContent,
+					imageList:JSON.stringify(this.images),
+					postTime: new Date()
+				}
+				console.log(postData)
+				this.Request.InsertBlog(postData)
+				.then(res=>{
+					if(res.data.code === 200){
+						uni.showToast({
+							// icon:'none',
+							title:"发送成功"
+						})
+						uni.navigateBack({
+							delta: 1
+						})
+					}
+				})
+			}
+		},
+		components: {
+			imageDragSort,
+		},
+		computed: {
+			userData(){
+				return this.$store.state.userData
+			}
+		}
+	}
+</script>
+
+<style>
+
+</style>

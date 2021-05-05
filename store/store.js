@@ -66,6 +66,17 @@ const store = new Vuex.Store({
 					}
 				})
 			},
+			// 重置用户信息
+			resetUserData(state){
+				state.userData = {
+					userTimId:'',
+					userName:'',
+					userNickName:'',
+					avatarUrl:'',
+					email:'',
+					role:''
+				}
+			},
 			// 获取用户信息（tim端）
 			setUserProfile(state, profile){
 				state.userProfile = profile

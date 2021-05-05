@@ -3,8 +3,9 @@ import axios from 'axios';
 // import router from '../router'
 
 const instance = axios.create({
-  baseURL: 'http://im.lczeros.cn/IM',
+  // baseURL: 'http://im.lczeros.cn/IM',
   // baseURL: 'http://192.168.31.181:8085/IM',
+	baseURL: 'http://127.0.0.1:8085/IM',
   timeout: 10000,
   headers: {
     'Content-Type': "application/json;charset=UTF-8",
@@ -41,7 +42,7 @@ instance.interceptors.response.use(
   },
   error => {
     console.log(error)
-		alert("网络错挖")
+		alert("网络错误")
     return Promise.reject(error)
   }
 )
@@ -73,11 +74,41 @@ export default {
 	UserRegister(data){
 		return instance.post("/user/userRegister",data)
 	},
+	
 	//上传接口
 	UploadImage(data){
 		return instance.post("/upload/image",data)
 	},
 	Test(){
 	  return instance.post("/hello")
-	}
+	},
+	
+	//帖子接口
+	GetBlogList(userName){
+		return instance.get(`/blog/getBlogList?userName=${userName}`)
+	},
+	GetBlogListById(userName){
+		return instance.get(`/blog/getBlogListById?userName=${userName}`)
+	},
+	InsertBlog(data){
+		return instance.post("/blog/insertBlog",data)
+	},
+	GetCommentList(blogId){
+		return instance.get(`/blog/getCommentList?blogId=${blogId}`)
+	},
+	InsertComment(data){
+		return instance.post("/blog/insertComment",data)
+	},
+	DeleteComment(commentId){
+		return instance.delete(`/blog/deleteComment?commentId=${commentId}`)
+	},
+	DeleteBlog(blogId){
+		return instance.delete(`/blog/deleteBlog?blogId=${blogId}`)
+	},
+	InsertLike(data){
+		return instance.post("/blog/insertLike",data)
+	},
+	DeleteLike(data){
+		return instance.post("/blog/deleteLike",data)
+	},
 }

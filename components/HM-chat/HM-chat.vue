@@ -751,7 +751,7 @@
 			sendMsg(content,type){
 				//实际应用中，此处应该提交长连接，模板仅做本地处理。
 				var nowDate = new Date();
-				let lastid = this.msgList[this.msgList.length-1].msg.id?this.msgList[this.msgList.length-1].msg.id:0;
+				let lastid = this.msgList[this.msgList.length-1]?this.msgList[this.msgList.length-1].msg.id:0;
 				lastid++;
 				let msg = {type:'user',msg:{id:lastid,time:nowDate.getHours()+":"+nowDate.getMinutes(),type:type,userinfo:{uid:0,username:this.userinfo.nick,face:this.userinfo.avatar || '/static/user.png'},content:content}}
 				// 发送消息

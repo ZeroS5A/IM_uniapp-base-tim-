@@ -113,6 +113,15 @@
             }
             
         }
+        ,{
+            "path" : "pages/square/newBlog",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "新建帖子",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

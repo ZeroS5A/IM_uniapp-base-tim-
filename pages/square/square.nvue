@@ -1,44 +1,75 @@
 <template>
 	<view>
 		<uni-popup id="addComment" ref="addComment" type="dialog">
-			<uni-popup-dialog mode="input" title="添加评论" :value="addComment" placeholder="请输入..." @confirm="handleComment"></uni-popup-dialog>
+			<uni-popup-dialog mode="input" title="添加评论" v-model="commentConent" placeholder="请输入..." @confirm="handleComment"></uni-popup-dialog>
+		</uni-popup>
+		
+		<uni-popup id="deleteCommentDialog" ref="deleteCommentDialog" type="dialog">
+			<uni-popup-dialog type="error" title="警告" content="是否删除此评论" :before-close="true" @confirm="deleteComment" @close="$refs.deleteCommentDialog.close()"></uni-popup-dialog>
+		</uni-popup>
+		
+		<uni-popup id="deleteBlog" ref="deleteBlog" type="dialog">
+			<uni-popup-dialog type="error" title="警告" content="是否删除此帖" :before-close="true" @confirm="deleteBlog" @close="$refs.deleteBlog.close()"></uni-popup-dialog>
 		</uni-popup>
 		
 		<uni-fab
-				:pattern="pattern"
-				:content="content"
-				horizontal="right"
-				vertical="bottom"
-				direction="horizontal"
-				@trigger="trigger"
+			v-if="isLogin"
+			:pattern="pattern"
+			:content="content"
+			horizontal="right"
+			vertical="bottom"
+			direction="horizontal"
+			@trigger="trigger"
 		></uni-fab>
 		
 		<view class="example-body">
-			<uni-card v-for="n in 6" :isShadow="true" title="ZeroS" mode="title" thumbnail="https://lczeros.cn/blogData/images/b2ac992080e7ad69a4797ef82ccfc87a.jpeg" extra="10:22" note="true" @click="clickCard">
+			<uni-card v-for="(n,i) in blogList" :isShadow="true" :title="n.userName" mode="title" :thumbnail="n.avatarUrl" :extra="dateUtils.formatTimestamp(n.postTime/1000)" note="true">
 				<view>
 					<view class="content-box" style="margin-bottom: 20rpx;">
-						<text class="content-box-text">测试一下图片的排布</text>
+						<text class="content-box-text">{{n.content}}</text>
 					</view>
 					<view class="image-box">
 						<u-row>
-							<u-image style="margin-top: 10rpx;" src="https://lczeros.cn/blogData/images/212954fb6ab49561b046d3c5bf16799d.png" mode="widthFix"></u-image>
-							<u-col span="4" v-for="n in 6">
-								<u-image height="190rpx" style="margin-top: 20rpx;" src="https://lczeros.cn/blogData/images/b2ac992080e7ad69a4797ef82ccfc87a.jpeg" mode="aspectFit"></u-image>
+							<u-image v-if="n.imageList.length === 1" style="margin-top: 10rpx;" :src="n.imageList[0]" mode="widthFix"></u-image>
+							<u-col v-else span="4" v-for="img in n.imageList">
+								<u-image height="190rpx" style="margin-top: 20rpx;" :src="img" mode="aspectFit"></u-image>
 							</u-col>
 						</u-row>
 					</view>
 				</view>
 				<template slot="footer">
-					<view class="footer-box">
-						<view @click.stop="footerClick('喜欢')"><text class="footer-box__item">点赞</text></view>
-						<view @click.stop="$refs.addComment.open()"><text class="footer-box__item">评论</text></view>
-						<view @click.stop="footerClick('分享')"><text class="footer-box__item">删除</text></view>
+					<!-- 三个按钮 -->
+					<view class="footer-box" style="margin: 0 30px;">
+						<view v-if="n.isLiked" @click="disLike(n.blogId,i)">
+							<text class="footer-box__item" style="color: #007AFF;">
+								<u-icon name="thumb-up-fill" size="38"></u-icon>
+								{{n.likeNum}}
+							</text>
+						</view>
+						<view v-else @click="addLike(n.blogId,i)">
+							<text class="footer-box__item">
+								<u-icon name="thumb-up" size="38"></u-icon>
+								{{n.likeNum}}
+							</text>
+						</view>
+						
+						<view @click="openCommentModel(n.blogId,i)">
+							<text class="footer-box__item"><u-icon name="chat" size="38"></u-icon></text>
+						</view>
+						
+						<view @click="openDeleteBlogModle(n.blogId,i)">
+							<text class="footer-box__item" style="color: red;">
+								<u-icon :name="n.userName === userData.userName?'trash':''" size="38"></u-icon>
+							</text>
+						</view>
 					</view>
-					<view style="margin-top: 20rpx;width: 100%;background-color:#F5F5F5;">
-						<view v-for="n in 6">
-							<p style="word-break:break-all;">
-								<span style="color: #007AFF;" >ZeroS：</span>
-									sdfasad
+					
+					<!-- 评论区 -->
+					<view style="margin-top: 20rpx; padding: 0 6px; width: 100%;background-color:#F6F6F6;">
+						<view v-for="comment in n.commentList">
+							<p style="word-break:break-all;margin-top: 5px;" @click="ifDeleteComment(comment,i)">
+								<span style="color: #007AFF;" >{{comment.userName}}：</span>
+									{{comment.content}}
 							</p>
 						</view>
 					</view>
@@ -49,49 +80,245 @@
 </template>
 
 <script>
+	import { dateUtils } from '../../common/util.js'
 	export default {
 		data() {
 			return {
+				dateUtils,
+				
 				pattern: {
 					color: '#7A7E83',
 					backgroundColor: '#fff',
 					selectedColor: '#007AFF',
 				},
 				content: [{
-						iconPath: '/static/component.png',
-						selectedIconPath: '/static/componentHL.png',
+						iconPath: '/static/user.png',
+						selectedIconPath: '/static/user.png',
 						text: '我的',
+						pagePath: '/',
 						active: false
 					},
 					{
-						iconPath: '/static/api.png',
-						selectedIconPath: '/static/apiHL.png',
+						iconPath: '/static/add.png',
+						selectedIconPath: '/static/add.png',
 						text: '发布',
+						pagePath: './newBlog',
 						active: false
 					},
 				],
 				
-				addComment:''
+				selectedCommentId:'',
+				selectedBlogId:'',
+				selectedBlogIndex:'',
+				commentConent:'',
+				blogList:[],
+				
+				isMine:false
 			}
 		},
 		methods: {
-			handleComment:function(){
-				console.log(this.addComment)
-				this.$refs.addComment.close()
-			}
+			getBlogList:function() {
+				this.isMine = false
+				this.Request.GetBlogList(this.userData.userName)
+				.then(res=>{
+					// 转换图片列表为json对象,并获取评论
+					this.blogList=res.data.data.map((i,n)=>{
+						this.getCommentList(i.blogId,n)
+						return ({
+							...i,
+							imageList:JSON.parse(i.imageList),
+							commentList:[]
+						})
+					})
+				})
+			},
+			
+			openCommentModel:function(blogId,i) {
+				if (!this.isLogin){
+					uni.showToast({
+						icon:'none',
+						title:"请先登录再评论"
+					})
+					return
+				}
+				this.selectedBlogId = blogId
+				this.selectedBlogIndex = i
+				this.$refs.addComment.open()
+			},
+			
+			openDeleteBlogModle:function(blogId,i) {
+				this.selectedBlogId = blogId
+				this.$refs.deleteBlog.open()
+			},
+			
+			handleComment:function(done, val){
+				uni.showLoading()
+				console.log(val)
+				if(val.length<3){
+					uni.showToast({
+						icon:'none',
+						title:'输入的内容太少啦'
+					})
+					uni.hideLoading()
+				}
+				else{
+					let postData = {
+						userName:this.userData.userName,
+						blogId:this.selectedBlogId,
+						content:val,
+						commentTime:new Date()
+					}
+					
+					this.Request.InsertComment(postData)
+					.then(res=>{
+						console.log(res)
+						if (res.data.code === 200){
+							this.getCommentList(this.selectedBlogId,this.selectedBlogIndex)
+							uni.hideLoading()
+							done()
+						}else{
+							uni.showToast({
+								icon:'none',
+								title:'ERROR'
+							})
+						}
+						
+					})
+				}
+
+			},
+			
+			getCommentList:function(blogId,i){
+				this.Request.GetCommentList(blogId)
+				.then(res=>{
+					this.blogList[i].commentList = res.data.data
+				})
+			},
+			
+			ifDeleteComment:function(comment,i){
+				if (comment.userName != this.userData.userName){
+					return
+				}
+				else{
+					this.selectedCommentId = comment.commentId
+					this.selectedBlogId = comment.blogId
+					this.selectedBlogIndex = i
+					this.$refs.deleteCommentDialog.open()
+				}
+			},
+			
+			deleteComment:function(done){
+				uni.showLoading()
+				this.Request.DeleteComment(this.selectedCommentId)
+				.then(res=>{
+					if (res.data.code === 200){
+						this.getCommentList(this.selectedBlogId,this.selectedBlogIndex)
+						uni.hideLoading()
+						done()
+					}else{
+						uni.showToast({
+							icon:'none',
+							title:'ERROR'
+						})
+					}
+				})
+			},
+			
+			deleteBlog:function(done){
+				uni.showLoading()
+				this.Request.DeleteBlog(this.selectedBlogId)
+				.then(res=>{
+					if (res.data.code === 200){
+						this.getBlogList()
+						uni.hideLoading()
+						done()
+					}else{
+						uni.showToast({
+							icon:'none',
+							title:'ERROR'
+						})
+					}
+				})
+			},
+			
+			addLike:function(blogId,i){
+				if (!this.isLogin){
+					uni.showToast({
+						icon:'none',
+						title:"请先登录"
+					})
+					return
+				}
+				let postData = {
+					blogId,
+					userName:this.userData.userName
+				}
+				this.Request.InsertLike(postData)
+				.then(res=>{
+					if(res.data.code === 200){
+						this.blogList[i].isLiked = 1
+						this.blogList[i].likeNum = this.blogList[i].likeNum+1
+					}
+				})
+			},
+			
+			disLike:function(blogId,i){
+				let postData = {
+					blogId,
+					userName:this.userData.userName
+				}
+				this.Request.DeleteLike(postData)
+				.then(res=>{
+					if(res.data.code === 200){
+						this.blogList[i].isLiked = 0
+						this.blogList[i].likeNum = this.blogList[i].likeNum-1
+					}
+				})
+			},
+			
+			trigger:function(e) {
+				console.log(e.item)
+				if (e.item.text == '我的'){
+					if (this.isMine){
+						this.getBlogList()
+						return
+					}
+					this.Request.GetBlogListById(this.userData.userName)
+					.then(res=>{
+						this.isMine = true
+						// 转换图片列表为json对象,并获取评论
+						this.blogList=res.data.data.map((i,n)=>{
+							this.getCommentList(i.blogId,n)
+							return ({
+								...i,
+								imageList:JSON.parse(i.imageList),
+								commentList:[]
+							})
+						})
+					})
+				}
+				else if (e.item.text == '发布'){
+					uni.navigateTo({
+							url: e.item.pagePath
+					});
+				}
+
+			},
 		},
 		computed: {
 			isLogin(){
 				return this.$store.state.isLogin;
+			},
+			userData(){
+				return this.$store.state.userData
 			}
 		},
 		onShow() {
-			uni.showModal({
-				title: 'test',
-				content: this.$store.state.isLogin,
-				showCancel:false
-			})
-		}
+			this.getBlogList()
+		},
+		destroyed() {
+		    // this.blogList=[]
+		},
 	}
 </script>
 

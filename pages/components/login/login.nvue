@@ -42,7 +42,7 @@
 </template>
 
 <script>
-	import { genTestUserSig } from "@/utils/getPasswd.js"
+	// import { genTestUserSig } from "@/utils/getPasswd.js"
 	export default {
 		data() {
 			return {

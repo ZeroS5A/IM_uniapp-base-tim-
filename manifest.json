@@ -43,7 +43,9 @@
             /* ios打包配置 */
             "ios" : {},
             /* SDK配置 */
-            "sdkConfigs" : {}
+            "sdkConfigs" : {
+                "ad" : {}
+            }
         }
     },
     /* 快应用特有相关 */
@@ -71,9 +73,8 @@
     "h5" : {
         "title" : "Zim",
         /* "domain" : "im.lczeros.cn"*/
-				
-				"devServer": {
-				     "disableHostCheck": true
-				}
+        "devServer" : {
+            "disableHostCheck" : true
+        }
     }
 }

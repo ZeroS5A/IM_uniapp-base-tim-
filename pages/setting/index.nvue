@@ -79,12 +79,13 @@
 			logout: function () {
 				let promise = this.Tim.logout();
 				promise.then((imResponse)=> {
-					this.$store.commit('changeLoginState',false)
 				  console.log(imResponse.data); // 登出成功
 				}).catch((imError)=> {
-					this.$store.commit('changeLoginState',false)
 				  console.warn('logout error:', imError);
 				});
+				this.$store.commit('changeLoginState',false)
+				this.$store.commit('resetUserData')
+				
 			},
 			showUserProfile: function () {
 				console.log(this.$store.state.userProfile)
