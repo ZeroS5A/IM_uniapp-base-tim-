@@ -1,4 +1,5 @@
 import axios from 'axios';
+import store from '../store/store.js'
 // import { Message } from 'view-design';
 // import router from '../router'
 
@@ -13,18 +14,18 @@ const instance = axios.create({
   withCredentials: true,
 });
 // 请求拦截器,检测是否有token并携带
-// instance.interceptors.request.use(
-//   config => {
-//     const token = localStorage.getItem('token')
-//     if (token !== null & token !== '') {
-//       config.headers.Authorization = token
-//     }
-//     return config
-//   },
-//   error => {
-//     return Promise.reject(error)
-//   }
-// )
+instance.interceptors.request.use(
+  config => {
+    const token = store.state.userData.token
+    if (token !== null & token !== '') {
+      config.headers.Authorization = token
+    }
+    return config
+  },
+  error => {
+    return Promise.reject(error)
+  }
+)
 // 响应拦截器
 instance.interceptors.response.use(
   response => {

@@ -75,6 +75,7 @@
         /* "domain" : "im.lczeros.cn"*/
         "devServer" : {
             "disableHostCheck" : true
-        }
+        },
+        "domain" : "im.lczeros.cn"
     }
 }
