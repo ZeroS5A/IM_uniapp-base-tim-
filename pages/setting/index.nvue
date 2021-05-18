@@ -26,7 +26,7 @@
 				<view slot="header" class="slot-box">
 					<image class="slot-image" :src="getUserProfile.avatar?getUserProfile.avatar:'/static/user.png'" mode="widthFix"></image>
 				</view>
-				<text slot="body" class="slot-box slot-text">{{getUserProfile.nick?getUserProfile.nick:getUserProfile.userID}}</text>
+				<text slot="body" class="slot-box slot-text">{{getUserProfile.userID}}</text>
 			</uni-list-item>
 			
 			<uni-list-item link title="个人信息" @click="showUserProfile()" style="margin-top: 50rpx;" ></uni-list-item>
@@ -49,12 +49,6 @@
 			}
 		},
 		onLoad() {
-			// this.getStorage('isLogin')
-			uni.showModal({
-				title: 'test',
-				content: this.$store.state.isLogin,
-				showCancel:false
-			})
 
 		},
 		// onShow() {
@@ -71,8 +65,14 @@
 		watch: {
 			isLogin(){
 				uni.setNavigationBarTitle({
-				    title: this.$store.state.isLogin?"我的":"登录"
+				    title: this.isLogin?"我的":"登录"
 				});
+				if (!this.isLogin){
+					uni.showModal({
+						title: '请登录',
+						showCancel:false
+					})
+				}
 			},
 		},
 		methods: {

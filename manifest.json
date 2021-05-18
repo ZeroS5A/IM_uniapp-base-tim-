@@ -76,6 +76,16 @@
         "devServer" : {
             "disableHostCheck" : true
         },
-        "domain" : "im.lczeros.cn"
+        "domain" : "im.lczeros.cn",
+        "sdkConfigs" : {
+            "maps" : {
+                "qqmap" : {
+                    "key" : ""
+                }
+            }
+        },
+        "router" : {
+            "base" : "/Zim/"
+        }
     }
 }

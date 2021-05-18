@@ -78,7 +78,14 @@
 							icon:'none'
 						})
 					}
-
+					else if (res.data.code === 303){
+						uni.showToast({
+							title:'该用户已被封禁！',
+							duration:2000,
+							icon:'none'
+						})
+					}
+					
 				})
 
 			},

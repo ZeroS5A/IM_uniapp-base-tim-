@@ -29,6 +29,13 @@ let onSdkReady = function(event) {
 };
 tim.on(TIM.EVENT.SDK_READY, onSdkReady);
 
+// 踢下线时触发
+let onSdkNotReady = function(event) {
+	store.commit('changeLoginState',false)
+  console.log("被踢下线！")
+};
+tim.on(TIM.EVENT.SDK_NOT_READY, onSdkNotReady);
+
 // 获取用户信息
 let getUserProfile = function () {
 	let promise = tim.getMyProfile();
