@@ -9,7 +9,7 @@ let options = {
 
 let tim = TIM.create(options); // SDK 实例通常用 tim 表示
 
-tim.setLogLevel(0); // 普通级别，日志量较多，接入时建议使用
+tim.setLogLevel(1); // 普通级别，日志量较多，接入时建议使用
 tim.registerPlugin({
 	'tim-upload-plugin': TIMUploadPlugin
 });
@@ -30,11 +30,11 @@ let onSdkReady = function(event) {
 tim.on(TIM.EVENT.SDK_READY, onSdkReady);
 
 // 踢下线时触发
-let onSdkNotReady = function(event) {
+let onKickedOut = function(event) {
 	store.commit('changeLoginState',false)
   console.log("被踢下线！")
 };
-tim.on(TIM.EVENT.SDK_NOT_READY, onSdkNotReady);
+tim.on(TIM.EVENT.KICKED_OUT, onKickedOut);
 
 // 获取用户信息
 let getUserProfile = function () {

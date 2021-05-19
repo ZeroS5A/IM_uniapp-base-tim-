@@ -287,7 +287,7 @@ page{
 				align-items: center;
 				justify-content: space-between;
 				view {
-					background-color: #f06c7a;
+					background-color: rgb(18,150,220);
 					height: 50upx;
 					width: 6upx;
 					border-radius: 6upx;
@@ -424,7 +424,7 @@ page{
 					align-items: center;
 					justify-content: flex-end;
 					.bubble{
-						background-color: #f06c7a;
+						background-color: rgb(18,150,220);
 						color: #fff;
 						
 						&.voice{

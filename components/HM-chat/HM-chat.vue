@@ -118,7 +118,7 @@
 				<view class="list">
 					<view class="box" @tap="chooseImage"><view class="icon tupian2"></view></view>
 					<view class="box" @tap="camera"><view class="icon paizhao"></view></view>
-					<view class="box" @tap="handRedEnvelopes"><view class="icon hongbao"></view></view>
+					<!-- <view class="box" @tap="handRedEnvelopes"><view class="icon hongbao"></view></view> -->
 				</view>
 			</view>
 		</view>
@@ -446,6 +446,9 @@
 					return({type:"user",msg:{id:msg.ID,type:"text",time:dateUtils.formatTimestamp(msg.time),userinfo:{uid:msg.flow=='in'?1:0,username:msg.from,face:msg.avatar?msg.avatar:'/static/user.png'},content:msg.payload}})
 				}
 				else if (msg.type == "TIMCustomElem"){
+					if (msg.payload.description == 'img'){
+						return({type:"user",msg:{id:msg.ID,type:"img",userinfo:{uid:msg.flow=='in'?1:0,username:msg.from,face:msg.avatar?msg.avatar:'/static/user.png'},content:{url:msg.payload.data}}})
+					}
 					return({type:"system",msg:{id:msg.ID,type:"text",content:{text:msg.payload.extension}}})
 				}
 				else if (msg.type == "TIMGroupTipElem"){
@@ -499,8 +502,8 @@
 					
 					console.log(messageList)
 					messageList.forEach((msg)=>{
-						// console.log(msg)
 						this.msgList.push(this.transMsg(msg))
+						// console.log(this.msgList)
 					})
 					
 					this.transEnd()
@@ -612,62 +615,82 @@
 					sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
 					success: (res)=>{
 						// 本地处理
-						for(let i=0;i<res.tempFilePaths.length;i++){
-							uni.getImageInfo({
-								src: res.tempFilePaths[i],
-								success: async (image)=>{
-									// 本地
-									// console.log(image.width);
-									// console.log(image.height);
-									console.log(res.tempFilePaths)
-									let msg = {url:res.tempFilePaths[i],w:image.width,h:image.height};
-									this.sendMsg(msg,'img');
+						// for(let i=0;i<res.tempFilePaths.length;i++){
+						// 	uni.getImageInfo({
+						// 		src: res.tempFilePaths[i],
+						// 		success: async (image)=>{
+						// 			// 本地
+						// 			// console.log(image.width);
+						// 			// console.log(image.height);
+						// 			console.log(res)
+						// 			let msg = {url:res.tempFilePaths[i],w:image.width,h:image.height};
+						// 			this.sendMsg(msg,'img');
 									
-									// // 1. 创建消息实例，接口返回的实例可以上屏
-									// let message = this.Tim.createImageMessage({
-									//   to: this.dialogData.to,
-									//   conversationType: TIM.TYPES.CONV_C2C,
-									//   payload: {
-									//     file: res,
-									//   },
-									//   onProgress: function(event) { console.log('file uploading:', event) }
-									// });
+						// 			// 1. 创建消息实例，接口返回的实例可以上屏
+						// 			let message = this.Tim.createImageMessage({
+						// 			  to: this.dialogData.to,
+						// 			  conversationType: TIM.TYPES.CONV_C2C,
+						// 			  payload: {
+						// 			    file: res,
+						// 			  },
+						// 			  onProgress: function(event) { console.log('file uploading:', event) }
+						// 			});
 																
-									// // 2. 发送消息
-									// let promise = this.Tim.sendMessage(message);
-									// promise.then(function(imResponse) {
-									//   // 发送成功
-									//   console.log(imResponse);
-									// }).catch(function(imError) {
-									//   // 发送失败
-									//   console.warn('sendMessage error:', imError);
-									// });
+						// 			// 2. 发送消息
+						// 			let promise = this.Tim.sendMessage(message);
+						// 			promise.then(function(imResponse) {
+						// 			  // 发送成功
+						// 			  console.log(imResponse);
+						// 			}).catch(function(imError) {
+						// 			  // 发送失败
+						// 			  console.warn('sendMessage error:', imError);
+						// 			});
 									
-								}
-							});
-						}
+						// 		}
+						// 	});
+						// }
 						// 上传发送处理
 						res.tempFiles.forEach(img=>{
 								console.log(res)
-								// 1. 创建消息实例，接口返回的实例可以上屏
-							  let message = this.Tim.createImageMessage({
-							    to: this.dialogData.to,
-							    conversationType: TIM.TYPES.CONV_C2C,
-							    payload: {
-							      file: img
-							    },
-							    onProgress: function(event) { console.log('file uploading:', event) }
-							  });
-							
-							  // 2. 发送消息
-							  let promise = this.Tim.sendMessage(message);
-							  promise.then(function(imResponse) {
-							    // 发送成功
-							    console.log(imResponse);
-							  }).catch(function(imError) {
-							    // 发送失败
-							    console.warn('sendMessage error:', imError);
-							  });
+								var formdata = new FormData();
+								formdata.append('userID', '')
+								formdata.append('image', img);
+								formdata.append('type', 'charImg');
+								
+								this.Request.UploadImage(formdata)
+								.then(result=>{
+										if(result.data.code==200){
+												//获取md对象返回上传的url
+												console.log("图片链接",result.data)
+												// 本地回显
+												let msg = {url:result.data.data.imgUrl,w:img.width,h:img.height};
+												this.sendMsg(msg,'img');
+												
+												// 1. 创建消息实例，接口返回的实例可以上屏
+												let message = this.Tim.createCustomMessage({
+													to: this.dialogData.to,
+													conversationType: TIM.TYPES.CONV_C2C,
+													payload: {
+														description: 'img',
+														data: result.data.data.imgUrl
+													},
+												});
+											
+												// 2. 发送消息
+												let promise = this.Tim.sendMessage(message);
+												promise.then(function(imResponse) {
+													// 发送成功
+													console.log(imResponse);
+												}).catch(function(imError) {
+													// 发送失败
+													console.warn('sendMessage error:', imError);
+												});												
+												
+										}else{
+												console.log("error")
+										}
+								})
+
 						})
 					}
 				});
