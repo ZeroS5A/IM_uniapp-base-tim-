@@ -58,6 +58,7 @@
 
 <script>
 	// import { genTestUserSig } from "@/utils/getPasswd.js"
+	import md5 from 'js-md5';
 	export default {
 		data() {
 			return {
@@ -125,7 +126,7 @@
 							token:this.resignData.token,
 							code:this.resignData.mailCode,
 							userName:this.resignData.userID,
-							passwd:this.resignData.userPW
+							passwd:md5(this.resignData.userPW)
 						}
 					)
 					.then(result => {

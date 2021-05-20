@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "axios": "^0.21.1",
+    "js-md5": "^0.7.3",
+    "tim-js-sdk": "^2.11.0",
+    "tim-upload-plugin": "^1.0.1"
+  }
+}

@@ -209,7 +209,7 @@
 			
 			deleteComment:function(done){
 				uni.showLoading()
-				this.Request.DeleteComment(this.selectedCommentId)
+				this.Request.DeleteComment(this.selectedCommentId,this.userData.userName)
 				.then(res=>{
 					if (res.data.code === 200){
 						this.getCommentList(this.selectedBlogId,this.selectedBlogIndex)
@@ -226,7 +226,7 @@
 			
 			deleteBlog:function(done){
 				uni.showLoading()
-				this.Request.DeleteBlog(this.selectedBlogId)
+				this.Request.DeleteBlog(this.selectedBlogId,this.userData.userName)
 				.then(res=>{
 					if (res.data.code === 200){
 						this.getBlogList()

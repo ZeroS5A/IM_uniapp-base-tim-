@@ -37,6 +37,10 @@
 								<view v-if="row.msg.type=='text'" class="bubble">
 									<rich-text :nodes="row.msg.content.text"></rich-text>
 								</view>
+								<!-- 文件消息 -->
+								<view v-if="row.msg.type=='file'" class="bubble">
+									<a :href="row.msg.content.data" :download="row.msg.content.name">{{row.msg.content.name}}</a>
+								</view>
 								<!-- 语言消息 -->
 								<view v-if="row.msg.type=='voice'" class="bubble voice" @tap="playVoice(row.msg)" :class="playMsgid == row.msg.id?'play':''">
 									<view class="length">{{row.msg.content.length}}</view>
@@ -78,6 +82,10 @@
 								<view v-if="row.msg.type=='text'" class="bubble">
 									<rich-text :nodes="row.msg.content.text"></rich-text>
 								</view>
+								<!-- 文件消息 -->
+								<view v-if="row.msg.type=='file'" class="bubble">
+									<a :href="row.msg.content.data" :download="row.msg.content.name">{{row.msg.content.name}}</a>
+								</view>
 								<!-- 语音消息 -->
 								<view v-if="row.msg.type=='voice'" class="bubble voice" @tap="playVoice(row.msg)" :class="playMsgid == row.msg.id?'play':''">
 									<view class="icon other-voice"></view>
@@ -118,7 +126,7 @@
 				<view class="list">
 					<view class="box" @tap="chooseImage"><view class="icon tupian2"></view></view>
 					<view class="box" @tap="camera"><view class="icon paizhao"></view></view>
-					<!-- <view class="box" @tap="handRedEnvelopes"><view class="icon hongbao"></view></view> -->
+					<view class="box" @tap="chooseFile"><u-icon name="plus" size="30rpx"></u-icon></view>
 				</view>
 			</view>
 		</view>
@@ -350,6 +358,9 @@
 						case 'img':
 							this.addImgMsg(msg);
 							break;
+						case 'file':
+							this.addTextMsg(msg);
+							break;
 						case 'redEnvelope':
 							this.addRedEnvelopeMsg(msg);
 							break;
@@ -366,7 +377,52 @@
 					this.scrollToView = 'msg'+msg.msg.id
 				});
 			},
-			
+			chooseFile(){
+				this.hideDrawer();
+				console.log()
+				uni.chooseFile({
+				  count: 1,
+				    success: (res)=> {
+							console.log(res);
+							var formdata = new FormData();
+							formdata.append('userID', '')
+							formdata.append('image', res.tempFiles[0]);
+							formdata.append('type', 'charFile');
+							
+							this.Request.UploadImage(formdata)
+							.then(result=>{
+								if(result.data.code==200){
+									//获取md对象返回上传的url
+								 
+									// 1. 创建消息实例，接口返回的实例可以上屏
+									let message = this.Tim.createCustomMessage({
+											to: this.dialogData.to,
+											conversationType: this.dialogData.type,
+											payload: {
+													description: 'file',
+													data: result.data.data.imgUrl,
+													extension: res.tempFiles[0].name
+											},
+									});
+									
+									// 2. 发送消息
+									let promise = this.Tim.sendMessage(message);
+									promise.then((imResponse) =>{
+										// 发送成功
+										let msg = {url:result.data.data.imgUrl,name:res.tempFiles[0].name}
+										this.sendMsg(msg,'file');
+										this.transEnd()
+										}).catch(function(imError) {
+												// 发送失败
+												console.warn('sendMessage error:', imError);
+										});
+									}else{
+											console.log("error")
+									}
+							})
+				    }
+				});
+			},
 			// 触发滑动到顶部(加载历史信息记录)
 			loadHistory(e){
 				if(this.isHistoryLoading){
@@ -448,6 +504,9 @@
 				else if (msg.type == "TIMCustomElem"){
 					if (msg.payload.description == 'img'){
 						return({type:"user",msg:{id:msg.ID,type:"img",userinfo:{uid:msg.flow=='in'?1:0,username:msg.from,face:msg.avatar?msg.avatar:'/static/user.png'},content:{url:msg.payload.data}}})
+					}
+					if (msg.payload.description == 'file'){
+						return({type:"user",msg:{id:msg.ID,type:"file",userinfo:{uid:msg.flow=='in'?1:0,username:msg.from,face:msg.avatar?msg.avatar:'/static/user.png'},content:{url:msg.payload.data,name:msg.payload.extension}}})
 					}
 					return({type:"system",msg:{id:msg.ID,type:"text",content:{text:msg.payload.extension}}})
 				}
@@ -614,41 +673,6 @@
 					sourceType:[type],
 					sizeType: ['original', 'compressed'], //可以指定是原图还是压缩图，默认二者都有
 					success: (res)=>{
-						// 本地处理
-						// for(let i=0;i<res.tempFilePaths.length;i++){
-						// 	uni.getImageInfo({
-						// 		src: res.tempFilePaths[i],
-						// 		success: async (image)=>{
-						// 			// 本地
-						// 			// console.log(image.width);
-						// 			// console.log(image.height);
-						// 			console.log(res)
-						// 			let msg = {url:res.tempFilePaths[i],w:image.width,h:image.height};
-						// 			this.sendMsg(msg,'img');
-									
-						// 			// 1. 创建消息实例，接口返回的实例可以上屏
-						// 			let message = this.Tim.createImageMessage({
-						// 			  to: this.dialogData.to,
-						// 			  conversationType: TIM.TYPES.CONV_C2C,
-						// 			  payload: {
-						// 			    file: res,
-						// 			  },
-						// 			  onProgress: function(event) { console.log('file uploading:', event) }
-						// 			});
-																
-						// 			// 2. 发送消息
-						// 			let promise = this.Tim.sendMessage(message);
-						// 			promise.then(function(imResponse) {
-						// 			  // 发送成功
-						// 			  console.log(imResponse);
-						// 			}).catch(function(imError) {
-						// 			  // 发送失败
-						// 			  console.warn('sendMessage error:', imError);
-						// 			});
-									
-						// 		}
-						// 	});
-						// }
 						// 上传发送处理
 						res.tempFiles.forEach(img=>{
 								console.log(res)
@@ -669,7 +693,7 @@
 												// 1. 创建消息实例，接口返回的实例可以上屏
 												let message = this.Tim.createCustomMessage({
 													to: this.dialogData.to,
-													conversationType: TIM.TYPES.CONV_C2C,
+													conversationType: this.dialogData.type,
 													payload: {
 														description: 'img',
 														data: result.data.data.imgUrl

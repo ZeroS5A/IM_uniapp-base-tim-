@@ -43,6 +43,7 @@
 
 <script>
 	// import { genTestUserSig } from "@/utils/getPasswd.js"
+	import md5 from 'js-md5';
 	export default {
 		data() {
 			return {
@@ -61,9 +62,12 @@
 				uni.navigateTo({url: '/pages/components/resign/resign'});
 			},
 			login: function () {
-				// this.Request.UserLogin(this.loginData)
-				// this.setStorage(true)
-				this.Request.UserLogin(this.loginData)
+				let postData={
+						userID:this.loginData.userID,
+						userPW:md5(this.loginData.userPW)
+						// password:md5(this.formData.passwd)
+				}
+				this.Request.UserLogin(postData)
 				.then((res)=>{
 					console.log(res)
 					if (res.data.code === 200) {

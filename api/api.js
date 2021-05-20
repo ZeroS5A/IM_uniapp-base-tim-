@@ -100,11 +100,11 @@ export default {
 	InsertComment(data){
 		return instance.post("/blog/insertComment",data)
 	},
-	DeleteComment(commentId){
-		return instance.delete(`/blog/deleteComment?commentId=${commentId}`)
+	DeleteComment(commentId,userName){
+		return instance.delete(`/blog/deleteComment?commentId=${commentId}&userName=${userName}`)
 	},
-	DeleteBlog(blogId){
-		return instance.delete(`/blog/deleteBlog?blogId=${blogId}`)
+	DeleteBlog(blogId,userName){
+		return instance.delete(`/blog/deleteBlog?blogId=${blogId}&userName=${userName}`)
 	},
 	InsertLike(data){
 		return instance.post("/blog/insertLike",data)
