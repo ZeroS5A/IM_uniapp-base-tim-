@@ -4,10 +4,10 @@ import store from '../store/store.js'
 // import router from '../router'
 
 const instance = axios.create({
-  // baseURL: 'http://im.lczeros.cn/IM',
+  baseURL: 'http://im.lczeros.cn/IM',
   // baseURL: 'http://192.168.31.181:8085/IM',
-	baseURL: 'http://127.0.0.1:8085/IM',
-  timeout: 10000,
+	// baseURL: 'http://127.0.0.1:8085/IM',
+  timeout: 100000,
   headers: {
     'Content-Type': "application/json;charset=UTF-8",
   },

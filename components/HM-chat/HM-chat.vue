@@ -113,14 +113,14 @@
 		</view>
 		<!-- 抽屉栏 -->
 		<view class="popup-layer" :class="popupLayerClass" @touchmove.stop.prevent="discard">
-			<!-- 表情 --> 
+			<!-- 表情 
 			<swiper class="emoji-swiper" :class="{hidden:hideEmoji}" indicator-dots="true" duration="150">
 				<swiper-item v-for="(page,pid) in emojiList" :key="pid">
 					<view v-for="(em,eid) in page" :key="eid" @tap="addEmoji(em)">
 						<image mode="widthFix" :src="'/static/img/emoji/'+em.url"></image>
 					</view>
 				</swiper-item>
-			</swiper>
+			</swiper>--> 
 			<!-- 更多功能 相册-拍照-红包 -->
 			<view class="more-layer" :class="{hidden:hideMore}">
 				<view class="list">
@@ -149,9 +149,9 @@
 					<view class="box">
 						<textarea auto-height="true" v-model="textMsg" @focus="textareaFocus"/>
 					</view>
-					<view class="em" @tap="chooseEmoji">
+					<!-- <view class="em" @tap="chooseEmoji">
 						<view class="icon biaoqing"></view>
-					</view>
+					</view> -->
 				</view>
 			</view>
 			<!-- #ifndef H5 -->
